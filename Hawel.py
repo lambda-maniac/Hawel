@@ -1,6 +1,3 @@
-""" =====
-::: Token
-===== """
 class Token:
     def __init__(self, _type, value):
         self.type  = _type
@@ -12,9 +9,6 @@ class Token:
     def __repr__(self):
         return f'["{self.value}": {self.type}]'
 
-""" =====
-::: Lexer
-===== """
 class Lexer:
     import re
 
@@ -49,12 +43,6 @@ class Lexer:
 
         return tokenList
 
-""" ======
-::: Parser
-====== """
-""" =====
-::: Nodes
-===== """
 class IntNode:
     def __init__(self, token):
         self.token = token
@@ -110,7 +98,7 @@ class IfNode:
         self.cases = cases
 
     def __repr__(self):
-        return ''.join([f'({condition}<<{expression}>>)' for condition, expression in self.cases])
+        return ''.join([f'(? {condition}<<{expression}>>)' for condition, expression in self.cases])
 
 class ForNode:
     def __init__(self, variableNameToken, startValueNode, endValueNode, stepValueNode, bodyNode):
@@ -130,6 +118,23 @@ class WhileNode:
 
     def __repr__(self):
         return f'({self.conditionNode})<<{self.bodyNode}>>'
+
+class FunctionDefinitionNode:
+    def __init__(self, functionNameToken, argNameTokens, bodyNode):
+        self.functionNameToken = functionNameToken
+        self.argNameTokens     = argNameTokens
+        self.bodyNode          = bodyNode
+
+    def __repr__(self):
+        return f'({self.functionNameToken}({self.argNameTokens})<<{self.bodyNode}>>)'
+
+class CallNode:
+    def __init__(self, nodeToCall, argNodes):
+        self.nodeToCall = nodeToCall
+        self.argNodes   = argNodes
+
+    def __repr__(self):
+        return f'({self.nodeToCall}({self.argNodes}))'
 
 class Parser:
     def __init__(self, tokens):
@@ -159,6 +164,54 @@ class Parser:
             leftNode  = BinOpNode(operationToken, leftNode, rightNode)
 
         return leftNode
+
+    def functionExpression(self):
+        if self.currentToken.type == "IDENTIFIER":
+            functionName = self.currentToken
+            self.advance()
+
+            if not self.currentToken.match("LEFT_BRACKET"):
+                raise SyntaxError(f'Expected Token: "[", got Token: "{self.currentToken.type}"')
+        else:
+            functionName = Token("IDENTIFIER", "<Anonymous>")
+
+            if not self.currentToken.match("LEFT_BRACKET"):
+                raise SyntaxError(f'Expected IDENTIFIER or "[", got Token: "{self.currentToken.type}"')
+        self.advance()
+
+        argNameTokens = []
+        if self.currentToken.type == "IDENTIFIER":
+            argNameTokens.append(self.currentToken)
+            self.advance()
+
+            while self.currentToken.type == "SEPARATOR":
+                self.advance()
+
+                if self.currentToken.type != "IDENTIFIER":
+                    raise SyntaxError(f'Expected IDENTIFIER, got: "{self.currentToken.type}"')
+
+                argNameTokens.append(self.currentToken)
+                self.advance()
+
+            if not self.currentToken.match("RIGHT_BRACKET"):
+                raise SyntaxError(f'Expected ";" or "]", got Token: "{self.currentToken.type}"')
+            self.advance()
+
+        else:
+            if not self.currentToken.match("RIGHT_BRACKET"):
+                raise SyntaxError(f'Expected IDENTIFIER or "]", got Token: "{self.currentToken.type}"')
+            self.advance()
+
+        if not self.currentToken.match("BLOCK"):
+            raise SyntaxError(f'Expected "$", got: "{self.currentToken.type}"')
+        self.advance()
+
+        return FunctionDefinitionNode(
+            functionName,
+            argNameTokens,
+            self.expression()
+        )
+
 
     def whileExpression(self):
         condition = self.expression()
@@ -263,7 +316,31 @@ class Parser:
         return self.binOperation(self.factor, "MUL|DIV", self.factor)
 
     def power(self):
-        return self.binOperation(self.atom, "POW", self.factor)
+        return self.binOperation(self.call, "POW", self.factor)
+
+    def call(self):
+        atom = self.atom()
+
+        if self.currentToken.type == "LEFT_BRACKET":
+            self.advance()
+
+            argNodes = []
+            if self.currentToken.type == "RIGHT_BRACKET":
+                self.advance()
+            else:
+                argNodes.append(self.expression())
+                while self.currentToken.type == "SEPARATOR":
+                    self.advance()
+
+                    argNodes.append(self.expression())
+
+                if self.currentToken.type != "RIGHT_BRACKET":
+                    raise SyntaxError(f'Expected ";" or "]", got Token: {self.currentToken.type}')
+                self.advance()
+        
+            return CallNode(atom, argNodes)
+
+        return atom
 
     def factor(self):
         token = self.currentToken
@@ -315,6 +392,10 @@ class Parser:
         elif token.match("WHILE"):
             self.advance()
             return self.whileExpression()
+
+        elif token.match("FUNCTION"):
+            self.advance()
+            return self.functionExpression()
 
         raise SyntaxError(f'Unexpected Token: "{token.type}"')
 
@@ -519,6 +600,47 @@ class Interpreter:
 
         return None
 
+    def visitFunctionDefinitionNode(self, node, context):
+        functionName = node.functionNameToken.value
+        bodyNode     = node.bodyNode
+        
+        functionValue = Function(functionName, node.argNameTokens, bodyNode)
+
+        if node.functionNameToken:
+            context.symbols.set(functionName, functionValue)
+
+        return functionValue
+
+    def visitCallNode(self, node, context):
+        valueToCall = self.visit(node.nodeToCall, context)
+
+        args = [self.visit(argNode, context) for argNode in node.argNodes]
+
+        return valueToCall.execute(args)
+
+class Function:
+    def __init__(self, name, argNames, bodyNode):
+        self.name     = name
+        self.argNames = argNames
+        self.bodyNode = bodyNode
+
+    def execute(self, args):
+        if len(args) > len(self.argNames):
+            raise SyntaxError(f'Too many arguments given to {self.name}.')
+        if len(args) < len(self.argNames):
+            raise SyntaxError(f'Too few arguments given to {self.name}.')
+
+        context = Context(self.name)
+        for i in range(len(args)):
+            argName  = self.argNames[i].value
+            argValue = args[i]
+            context.symbols.set(argName, argValue)
+
+        return Interpreter(self.bodyNode).interpretate(context)
+
+    def __repr__(self):
+        return f'<function {self.name}>'
+
 def main():
 
     Tokens = {
@@ -541,6 +663,12 @@ def main():
 
         # While loop
         r"^\%": "WHILE",
+
+        # Functions
+        r"^\@": "FUNCTION",
+        r"^\;": "SEPARATOR",
+        r"^\[": "LEFT_BRACKET",
+        r"^\]": "RIGHT_BRACKET",
         
         # Syntax
         r"^\$": "BLOCK",
@@ -603,6 +731,6 @@ def main():
         print(f'\nAST: {ast}')
 
         result = Interpreter(ast).interpretate(context)
-        print(f'\nResult: {result}')
+        print(f'\nResult: {result} - {type(result)}')
 
 if __name__ == '__main__': main()
