@@ -119,6 +119,13 @@ class WhileNode:
     def __repr__(self):
         return f'({self.conditionNode})<<{self.bodyNode}>>'
 
+class ReturnNode:
+    def __init__(self, nodeToReturn):
+        self.nodeToReturn = nodeToReturn
+
+    def __repr__(self):
+        return f'(<<= {self.nodeToReturn})'
+
 class FunctionDefinitionNode:
     def __init__(self, functionNameToken, argNameTokens, bodyNode):
         self.functionNameToken = functionNameToken
@@ -136,6 +143,13 @@ class CallNode:
     def __repr__(self):
         return f'({self.nodeToCall}({self.argNodes}))'
 
+class ListNode:
+    def __init__(self, nodeList):
+        self.nodeList = nodeList
+
+    def __repr__(self):
+        return "{"+'; '.join([str(node) for node in self.nodeList])+"}"
+
 class Parser:
     def __init__(self, tokens):
         self.tokens     = tokens
@@ -144,13 +158,24 @@ class Parser:
         self.advance()
 
     def parse(self):
-        return self.expression()
+        return self.statements()
 
     def advance(self):
         self.tokenIndex += 1
 
         if self.tokenIndex < len(self.tokens):
             self.currentToken = self.tokens[self.tokenIndex]
+
+    def statements(self):
+        statements = []
+
+        statements.append(self.expression())
+
+        while self.currentToken.match("NEXT"):
+            self.advance()
+            statements.append(self.expression())
+
+        return ListNode(statements)
 
     def binOperation(self, leftTokenType, operations, rightTokenType):
         leftNode = leftTokenType()
@@ -164,6 +189,26 @@ class Parser:
             leftNode  = BinOpNode(operationToken, leftNode, rightNode)
 
         return leftNode
+
+    def listExpression(self):
+        nodesList = []
+
+        if self.currentToken.match("RIGHT_CURLY"):
+            self.advance()
+
+        else:
+            nodesList.append(self.expression())
+
+            while self.currentToken.type == "SEPARATOR":
+                self.advance()
+
+                nodesList.append(self.expression())
+
+            if self.currentToken.type != "RIGHT_CURLY":
+                raise SyntaxError(f'Expected ";" or "{"}"}", got Token: {self.currentToken.type}')
+            self.advance()
+        
+        return ListNode(nodesList)
 
     def functionExpression(self):
         if self.currentToken.type == "IDENTIFIER":
@@ -206,12 +251,17 @@ class Parser:
             raise SyntaxError(f'Expected "$", got: "{self.currentToken.type}"')
         self.advance()
 
+        body = self.statements()
+
+        if not self.currentToken.match("BLOCK"):
+            raise SyntaxError(f'Expected "$", got: "{self.currentToken.type}"')
+        self.advance()
+
         return FunctionDefinitionNode(
             functionName,
             argNameTokens,
-            self.expression()
+            body
         )
-
 
     def whileExpression(self):
         condition = self.expression()
@@ -220,7 +270,13 @@ class Parser:
             raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
         self.advance()
 
-        return WhileNode(condition, self.expression())
+        body = self.statements()
+
+        if not self.currentToken.match("BLOCK"):
+            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+        self.advance()
+
+        return WhileNode(condition, body)
 
     def forExpression(self):
         if self.currentToken.type != "IDENTIFIER":
@@ -251,7 +307,13 @@ class Parser:
             raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
         self.advance()
 
-        return ForNode(variableName, startValue, endValue, stepValue, self.expression())
+        body = self.statements()
+
+        if not self.currentToken.match("BLOCK"):
+            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+        self.advance()
+
+        return ForNode(variableName, startValue, endValue, stepValue, body)
 
     def ifExpression(self):
         cases     = []
@@ -262,7 +324,7 @@ class Parser:
             raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
         self.advance()
 
-        cases.append((condition, self.expression()))
+        cases.append((condition, self.statements()))
 
         while self.currentToken.match('ELSE_IF'):
             self.advance()
@@ -273,12 +335,16 @@ class Parser:
                 raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
             self.advance()
 
-            cases.append((condition, self.expression()))
+            cases.append((condition, self.statements()))
 
         if self.currentToken.match("ELSE"):
             self.advance()
 
-            cases.append((IntNode(Token("INT", 1)), self.expression()))
+            cases.append((IntNode(Token("INT", 1)), self.statements()))
+        
+        if not self.currentToken.match("BLOCK"):
+            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+        self.advance()
 
         return IfNode(cases)
 
@@ -380,6 +446,10 @@ class Parser:
 
             else:
                 raise SyntaxError (f'Expected Token: ")", got Token: "{self.currentToken.type}"')
+
+        elif token.match("LEFT_CURLY"):
+            self.advance()
+            return self.listExpression()
 
         elif token.match("IF"):
             self.advance()
@@ -519,6 +589,21 @@ class String:
     def __repr__(self):
         return f'{self.value}'
 
+class List:
+    def __init__(self, elements):
+        self.elements = elements
+
+    def ADD(self, other):
+        if isinstance(other, List):
+            return List(self.elements + other.elements)
+
+    def POW(self, other):
+        if isinstance(other, Int):
+            return self.elements.pop(other.value)
+
+    def __repr__(self):
+        return "{"+'; '.join([str(element) for element in self.elements])+"}"
+
 class Interpreter:
     def __init__(self, rootNode):
         self.rootNode = rootNode
@@ -537,6 +622,9 @@ class Interpreter:
 
     def visitStringNode(self, node, context):
         return String(node.token.value)
+
+    def visitListNode(self, node, context):
+        return List([self.visit(elementNode, context) for elementNode in node.nodeList])
 
     def visitVariableAccessNode(self, node, context):
         value = context.symbols.get(node.variable.value)
@@ -578,9 +666,10 @@ class Interpreter:
             conditionValue = self.visit(condition, context)
 
             if conditionValue.value != 0:
-                return self.visit(expression, context)
+                self.visit(expression, context)
+                break
 
-        return None
+        return Int(0)
 
     def visitForNode(self, node, context):
         startNode = self.visit(node.startValueNode, context)
@@ -592,13 +681,13 @@ class Interpreter:
 
             self.visit(node.bodyNode, context)
 
-        return None
+        return Int(0)
 
     def visitWhileNode(self, node, context):
         while self.visit(node.conditionNode, context).value != 0:
             self.visit(node.bodyNode, context)
 
-        return None
+        return Int(0)
 
     def visitFunctionDefinitionNode(self, node, context):
         functionName = node.functionNameToken.value
@@ -626,9 +715,9 @@ class Function:
 
     def execute(self, args):
         if len(args) > len(self.argNames):
-            raise SyntaxError(f'Too many arguments given to {self.name}.')
+            raise SyntaxError(f'Too many arguments given to "{self.name}".')
         if len(args) < len(self.argNames):
-            raise SyntaxError(f'Too few arguments given to {self.name}.')
+            raise SyntaxError(f'Too few arguments given to "{self.name}".')
 
         context = Context(self.name)
         for i in range(len(args)):
@@ -643,10 +732,12 @@ class Function:
 
 def main():
 
-    Tokens = {
+    import sys
 
+    Tokens = \
+    {
         # Ignore
-        r"^\s+": None,
+        r"^[\s+\n+]": None,
 
         # Var
         r"^\\": "MAKE_VAR",
@@ -655,6 +746,9 @@ def main():
         r"^\?\.\.": "IF",
         r"^\.\?\.": "ELSE_IF",
         r"^\.\.\?": "ELSE",
+
+        # Next
+        r"^(\.|\|)": "NEXT",
 
         # For loop
         r"^\!": "FOR",
@@ -680,6 +774,8 @@ def main():
 
         # Symbols #
         r"^\:": "ASSIGNMENT",
+        r"^\{": "LEFT_CURLY",
+        r"^\}": "RIGHT_CURLY",
 
         # Arithmetic
         r"^\+\+": "INCREMENT",
@@ -719,18 +815,23 @@ def main():
     context = Context('main')
     for name, value in constants.items():
         context.symbols.set(name, value)
-    
-    while True:
 
-        tokens = Lexer(Tokens).lex(input(">>> "))
+    if len(sys.argv) == 1:
+        while True:
 
-        print("\nToken List: ")
-        for token in tokens: print(f'-- {token}')
+            tokens = Lexer(Tokens).lex(input(">>> "))
 
-        ast = Parser(tokens).parse()
-        print(f'\nAST: {ast}')
+            print("\nToken List: ")
+            for token in tokens: print(f'-- {token}')
 
-        result = Interpreter(ast).interpretate(context)
-        print(f'\nResult: {result} - {type(result)}')
+            ast = Parser(tokens).parse()
+            print(f'\nAST: {ast}')
+
+            result = Interpreter(ast).interpretate(context)
+            print(f'\nResult: {result} - {type(result)}')
+
+    else:
+        with open(f'{sys.argv[1]}', 'r') as file:
+            print(Interpreter(Parser(Lexer(Tokens).lex(file.read())).parse()).interpretate(context))
 
 if __name__ == '__main__': main()
