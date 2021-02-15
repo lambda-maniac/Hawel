@@ -50,7 +50,7 @@ class IntNode:
         self.token.value = int(self.token.value)
 
     def __repr__(self):
-        return f'{self.token}'
+        return f'int::\'{self.token.value}\''
 
 class StringNode:
     def __init__(self, token):
@@ -59,7 +59,7 @@ class StringNode:
         self.token.value = self.token.value[1:-1:]
 
     def __repr__(self):
-        return f'{self.token}'
+        return f'string::\'{self.token.value}\''
 
 class UnaryOpNode:
     def __init__(self, operator, node):
@@ -67,7 +67,7 @@ class UnaryOpNode:
         self.node     = node
 
     def __repr__(self):
-        return f'({self.operator}, {self.node})'
+        return f'(operate::{self.operator}, to::{self.node})'
 
 class VariableNode:
     def __init__(self, name, valueNode):
@@ -75,14 +75,14 @@ class VariableNode:
         self.valueNode = valueNode
 
     def __repr__(self):
-        return f'({self.name}: {self.valueNode})'
+        return f'(set::"{self.name}", as::{self.valueNode})'
 
 class VariableAccessNode:
     def __init__(self, variable):
         self.variable = variable
 
     def __repr__(self):
-        return f'{self.variable}'
+        return f'get::{self.variable}'
 
 class BinOpNode:
     def __init__(self, operation, leftNode, rightNode):
@@ -91,14 +91,14 @@ class BinOpNode:
         self.rightNode = rightNode
 
     def __repr__(self):
-        return f'({self.operation}, {self.leftNode}, {self.rightNode})'
+        return f'(do::{self.operation}, to::(left::{self.leftNode}, right::{self.rightNode}))'
 
 class IfNode:
     def __init__(self, cases):
         self.cases = cases
 
     def __repr__(self):
-        return ''.join([f'(? {condition}<<{expression}>>)' for condition, expression in self.cases])
+        return ''.join([f'(if::{condition}, do::{expression})' for condition, expression in self.cases])
 
 class ForNode:
     def __init__(self, variableNameToken, startValueNode, endValueNode, stepValueNode, bodyNode):
@@ -109,7 +109,7 @@ class ForNode:
         self.bodyNode          = bodyNode
 
     def __repr__(self):
-        return f'({self.variableNameToken}: {self.startValueNode} => {self.endValueNode} .. {self.stepValueNode})<<{self.bodyNode}>>'    
+        return f'(for::{self.variableNameToken}, as::{self.startValueNode}, to::{self.endValueNode}, by::{self.stepValueNode}, do::{self.bodyNode})'    
 
 class WhileNode:
     def __init__(self, conditionNode, bodyNode):
@@ -117,14 +117,7 @@ class WhileNode:
         self.bodyNode      = bodyNode
 
     def __repr__(self):
-        return f'({self.conditionNode})<<{self.bodyNode}>>'
-
-class ReturnNode:
-    def __init__(self, nodeToReturn):
-        self.nodeToReturn = nodeToReturn
-
-    def __repr__(self):
-        return f'(<<= {self.nodeToReturn})'
+        return f'(while::{self.conditionNode}, do::({self.bodyNode})'
 
 class FunctionDefinitionNode:
     def __init__(self, functionNameToken, argNameTokens, bodyNode):
@@ -133,7 +126,14 @@ class FunctionDefinitionNode:
         self.bodyNode          = bodyNode
 
     def __repr__(self):
-        return f'({self.functionNameToken}({self.argNameTokens})<<{self.bodyNode}>>)'
+        return f'(Funcion::{self.functionNameToken}, args::{self.argNameTokens}, body::{self.bodyNode})'
+
+class ReturnNode:
+    def __init__(self, nodeToReturn):
+        self.nodeToReturn = nodeToReturn
+
+    def __repr__(self):
+        return f'return::{self.nodeToReturn}'
 
 class CallNode:
     def __init__(self, nodeToCall, argNodes):
@@ -141,7 +141,7 @@ class CallNode:
         self.argNodes   = argNodes
 
     def __repr__(self):
-        return f'({self.nodeToCall}({self.argNodes}))'
+        return f'(call::(args::{self.argNodes}, on::{self.nodeToCall}))'
 
 class ListNode:
     def __init__(self, nodeList):
@@ -169,13 +169,19 @@ class Parser:
     def statements(self):
         statements = []
 
-        statements.append(self.expression())
+        statements.append(self.statement())
 
         while self.currentToken.match("NEXT"):
             self.advance()
-            statements.append(self.expression())
+            statements.append(self.statement())
 
         return ListNode(statements)
+
+    def statement(self):
+        if self.currentToken.match("RETURN"):
+            self.advance()
+            return ReturnNode(self.expression())
+        return self.expression()
 
     def binOperation(self, leftTokenType, operations, rightTokenType):
         leftNode = leftTokenType()
@@ -383,39 +389,43 @@ class Parser:
 
     def power(self):
         return self.binOperation(self.call, "POW", self.factor)
+    
+    def getArgs(self):
+        self.advance()
+
+        argNodes = []
+        if self.currentToken.type == "RIGHT_BRACKET":
+            self.advance()
+        else:
+            argNodes.append(self.expression())
+            while self.currentToken.type == "SEPARATOR":
+                self.advance()
+
+                argNodes.append(self.expression())
+
+            if self.currentToken.type != "RIGHT_BRACKET":
+                raise SyntaxError(f'Expected ";" or "]", got Token: {self.currentToken.type}')
+            self.advance()
+
+        return argNodes
 
     def call(self):
         atom = self.atom()
 
-        if self.currentToken.type == "LEFT_BRACKET":
-            self.advance()
+        stack  = None
+        reduce = False
+        while self.currentToken.type == "LEFT_BRACKET":
+            argNodes = self.getArgs()
 
-            argNodes = []
-            if self.currentToken.type == "RIGHT_BRACKET":
-                self.advance()
-            else:
-                argNodes.append(self.expression())
-                while self.currentToken.type == "SEPARATOR":
-                    self.advance()
-
-                    argNodes.append(self.expression())
-
-                if self.currentToken.type != "RIGHT_BRACKET":
-                    raise SyntaxError(f'Expected ";" or "]", got Token: {self.currentToken.type}')
-                self.advance()
+            if reduce: stack = CallNode(stack, argNodes)
+            else     : stack = CallNode(atom, argNodes); reduce = True
         
-            return CallNode(atom, argNodes)
-
-        return atom
+        return stack if stack else atom
 
     def factor(self):
         token = self.currentToken
 
         if token.type in "ADD|SUB":
-            self.advance()
-            return UnaryOpNode(token, self.factor())
-
-        if token.type in "INCREMENT|DECREMENT":
             self.advance()
             return UnaryOpNode(token, self.factor())
 
@@ -493,6 +503,10 @@ class Context:
         self.contextName = name
         self.symbols     = SymbolTable()
         self.parent      = parent
+
+    def extend(self, other):
+        for name, value in other.symbols.symbols.items():
+            self.symbols.set(name, value)
 
 class Int:
     def __init__(self, value):
@@ -604,6 +618,26 @@ class List:
     def __repr__(self):
         return "{"+'; '.join([str(element) for element in self.elements])+"}"
 
+class RuntimeResult:
+    def __init__(self):
+        self.value = None
+        self.error = None
+    
+    def register(self, response):
+        if     response.error : self.error = response.error
+        return response.value
+
+    def proceed(self, value):
+        self.value = value
+        return self
+
+    # def failure(self, error):
+    #     self.error = error
+    #     return self
+
+    def __repr__(self):
+        return f'{self.value}'
+
 class Interpreter:
     def __init__(self, rootNode):
         self.rootNode = rootNode
@@ -618,13 +652,19 @@ class Interpreter:
         raise Exception(f'No visit method for {type(node).__name__} declared')
 
     def visitIntNode(self, node, context):
-        return Int(node.token.value)
+        return RuntimeResult().proceed(
+            Int(node.token.value)
+        )
 
     def visitStringNode(self, node, context):
-        return String(node.token.value)
+        return RuntimeResult().proceed(
+            String(node.token.value)
+        )
 
     def visitListNode(self, node, context):
-        return List([self.visit(elementNode, context) for elementNode in node.nodeList])
+        return RuntimeResult().proceed(
+            List([self.visit(elementNode, context) for elementNode in node.nodeList])
+        )
 
     def visitVariableAccessNode(self, node, context):
         value = context.symbols.get(node.variable.value)
@@ -632,62 +672,74 @@ class Interpreter:
         if not value:
             raise SyntaxError(f'Variable "{node.variable.value}" not declared.')
 
-        return value
+        return RuntimeResult().proceed(value)
 
     def visitUnaryOpNode(self, node, context):
-        value = self.visit(node.node, context)
+        response = RuntimeResult()
+
+        value = response.register(self.visit(node.node, context))
 
         if node.operator.type == 'SUB':
-            return value.MUL(Int(-1))
+            return response.proceed(value.MUL(Int(-1)))
 
         if node.operator.type == 'NOT':
-            return value.NOT()
+            return response.proceed(value.NOT())
 
         if node.operator.type in 'INCREMENT|DECREMENT':
-            return getattr(value, node.operator.type)()
+            return response.proceed(getattr(value, node.operator.type)())
 
-        return value
+        return response.proceed(value)
 
     def visitVariableNode(self, node, context):
-        value = self.visit(node.valueNode, context)
+        response = RuntimeResult()
+
+        value = response.register(self.visit(node.valueNode, context))
 
         context.symbols.set(node.name, value)
 
-        return value
+        return response.proceed(value)
         
     def visitBinOpNode(self, node, context):
-        left  = self.visit(node.leftNode, context)
-        right = self.visit(node.rightNode, context)
+        response = RuntimeResult()
 
-        return getattr(left, node.operation.type)(right)
+        left  = response.register(self.visit(node.leftNode, context))
+        right = response.register(self.visit(node.rightNode, context))
+
+        return response.proceed(getattr(left, node.operation.type)(right))
 
     def visitIfNode(self, node, context):
+        response = RuntimeResult()
+
         for condition, expression in node.cases:
-            conditionValue = self.visit(condition, context)
+            conditionValue = response.register(self.visit(condition, context))
 
             if conditionValue.value != 0:
-                self.visit(expression, context)
+                response.register(self.visit(expression, context))
                 break
 
-        return Int(0)
+        return response.proceed(Int(0))
 
     def visitForNode(self, node, context):
-        startNode = self.visit(node.startValueNode, context)
-        endNode   = self.visit(node.endValueNode  , context)
-        stepNode  = self.visit(node.stepValueNode , context)
+        response = RuntimeResult()
+
+        startNode = response.register(self.visit(node.startValueNode, context))
+        endNode   = response.register(self.visit(node.endValueNode  , context))
+        stepNode  = response.register(self.visit(node.stepValueNode , context))
 
         for iterator in range(startNode.value, endNode.value, stepNode.value):
             context.symbols.set(node.variableNameToken.value, Int(iterator))
 
-            self.visit(node.bodyNode, context)
+            response.register(self.visit(node.bodyNode, context))
 
-        return Int(0)
+        return response.proceed(Int(0))
 
     def visitWhileNode(self, node, context):
-        while self.visit(node.conditionNode, context).value != 0:
-            self.visit(node.bodyNode, context)
+        response = RuntimeResult()
 
-        return Int(0)
+        while response.register(self.visit(node.conditionNode, context)).value != 0:
+            response.register(self.visit(node.bodyNode, context))
+
+        return response.proceed(Int(0))
 
     def visitFunctionDefinitionNode(self, node, context):
         functionName = node.functionNameToken.value
@@ -698,14 +750,21 @@ class Interpreter:
         if node.functionNameToken:
             context.symbols.set(functionName, functionValue)
 
-        return functionValue
+        return RuntimeResult().proceed(functionValue)
 
     def visitCallNode(self, node, context):
-        valueToCall = self.visit(node.nodeToCall, context)
+        response = RuntimeResult()
 
-        args = [self.visit(argNode, context) for argNode in node.argNodes]
+        valueToCall = response.register(self.visit(node.nodeToCall, context))
 
-        return valueToCall.execute(args)
+        args = [response.register(self.visit(argNode, context)) for argNode in node.argNodes]
+
+        return response.proceed(
+            valueToCall.execute(args, context)
+        )
+
+    # def visitReturnNode(self, node, context):
+    #     return self.visit(node.nodeToReturn, context) ???
 
 class Function:
     def __init__(self, name, argNames, bodyNode):
@@ -713,19 +772,23 @@ class Function:
         self.argNames = argNames
         self.bodyNode = bodyNode
 
-    def execute(self, args):
+    def execute(self, args, upperContext):
         if len(args) > len(self.argNames):
             raise SyntaxError(f'Too many arguments given to "{self.name}".')
         if len(args) < len(self.argNames):
             raise SyntaxError(f'Too few arguments given to "{self.name}".')
 
         context = Context(self.name)
+        context.extend(upperContext)
+
         for i in range(len(args)):
             argName  = self.argNames[i].value
             argValue = args[i]
             context.symbols.set(argName, argValue)
 
-        return Interpreter(self.bodyNode).interpretate(context)
+        return RuntimeResult().proceed(
+            Interpreter(self.bodyNode).interpretate(context)
+        )
 
     def __repr__(self):
         return f'<function {self.name}>'
@@ -740,7 +803,10 @@ def main():
         r"^[\s+\n+]": None,
 
         # Var
-        r"^\\": "MAKE_VAR",
+        r"^\-\-": "MAKE_VAR",
+
+        # Return
+        r"^\<\<\=": "RETURN",
         
         # If, Else If, Else
         r"^\?\.\.": "IF",
@@ -778,8 +844,6 @@ def main():
         r"^\}": "RIGHT_CURLY",
 
         # Arithmetic
-        r"^\+\+": "INCREMENT",
-        r"^\-\-": "DECREMENT",
         r"^\-": "SUB",
         r"^\+": "ADD",
         r"^\*": "MUL",
@@ -821,14 +885,15 @@ def main():
 
             tokens = Lexer(Tokens).lex(input(">>> "))
 
-            print("\nToken List: ")
+            print("\nToken List: "); print(tokens)
             for token in tokens: print(f'-- {token}')
 
             ast = Parser(tokens).parse()
             print(f'\nAST: {ast}')
 
             result = Interpreter(ast).interpretate(context)
-            print(f'\nResult: {result} - {type(result)}')
+            print(result)
+            # print(f'\nResult: {result} - {" - ".join([str(type(element)) for element in result.elements])}')
 
     else:
         with open(f'{sys.argv[1]}', 'r') as file:
