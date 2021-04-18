@@ -126,7 +126,7 @@ class FunctionDefinitionNode:
         self.bodyNode          = bodyNode
 
     def __repr__(self):
-        return f'(Funcion::{self.functionNameToken}, args::{self.argNameTokens}, body::{self.bodyNode})'
+        return f'(Funcion::{self.functionNameToken.value}, args::{self.argNameTokens}, body::{self.bodyNode})'
 
 class ReturnNode:
     def __init__(self, nodeToReturn):
@@ -170,7 +170,6 @@ class Parser:
         statements = []
 
         statements.append(self.statement())
-
         while self.currentToken.match("NEXT"):
             self.advance()
             statements.append(self.statement())
@@ -480,15 +479,15 @@ class Parser:
         raise SyntaxError(f'Unexpected Token: "{token.type}"')
 
 class SymbolTable:
-    def __init__(self):
+    def __init__(self, parent = None):
         self.symbols = {}
-        self.parent  = None
+        self.parent  = parent 
 
     def get(self, name):
         value = self.symbols.get(name, None)
 
         if value == None and self.parent:
-            return self.parent.get(name)
+            return self.parent.symbols.get(name)
 
         return value
 
@@ -501,12 +500,11 @@ class SymbolTable:
 class Context:
     def __init__(self, name, parent = None):
         self.contextName = name
-        self.symbols     = SymbolTable()
-        self.parent      = parent
+        self.symbols     = SymbolTable(parent)
 
-    def extend(self, other):
-        for name, value in other.symbols.symbols.items():
-            self.symbols.set(name, value)
+    # def extend(self, other):
+    #     for name, value in other.symbols.symbols.items():
+    #         self.symbols.set(name, value)
 
 class Int:
     def __init__(self, value):
@@ -619,9 +617,15 @@ class List:
         return "{"+'; '.join([str(element) for element in self.elements])+"}"
 
 class RuntimeResult:
-    def __init__(self):
+    def __init__(self) : self.reset()
+
+    def reset(self):
         self.value = None
         self.error = None
+
+        self.returnValue    = None
+        self.shouldBreak    = False
+        self.shouldContinue = False
     
     def register(self, response):
         if     response.error : self.error = response.error
@@ -630,6 +634,30 @@ class RuntimeResult:
     def proceed(self, value):
         self.value = value
         return self
+
+    def proceedWithReturn(self, value):
+        self.reset()
+        self.returnValue = value
+        self.value       = value
+        return self
+
+    def proceedWithContinue(self):
+        self.reset()
+        self.shouldContinue = True
+        return self
+
+    def proceedWithBreak(self):
+        self.reset()
+        self.shouldBreak = True
+        return self
+
+    def shouldReturn(self):
+        return (
+            self.error       or 
+            self.returnValue or 
+            self.shouldBreak or 
+            self.shouldContinue
+        )
 
     # def failure(self, error):
     #     self.error = error
@@ -678,6 +706,7 @@ class Interpreter:
         response = RuntimeResult()
 
         value = response.register(self.visit(node.node, context))
+        if response.shouldReturn(): return response
 
         if node.operator.type == 'SUB':
             return response.proceed(value.MUL(Int(-1)))
@@ -685,8 +714,8 @@ class Interpreter:
         if node.operator.type == 'NOT':
             return response.proceed(value.NOT())
 
-        if node.operator.type in 'INCREMENT|DECREMENT':
-            return response.proceed(getattr(value, node.operator.type)())
+        # if node.operator.type in 'INCREMENT|DECREMENT':
+        #     return response.proceed(getattr(value, node.operator.type)())
 
         return response.proceed(value)
 
@@ -694,6 +723,7 @@ class Interpreter:
         response = RuntimeResult()
 
         value = response.register(self.visit(node.valueNode, context))
+        if response.shouldReturn(): return response
 
         context.symbols.set(node.name, value)
 
@@ -703,7 +733,10 @@ class Interpreter:
         response = RuntimeResult()
 
         left  = response.register(self.visit(node.leftNode, context))
+        if response.shouldReturn(): return response
+        
         right = response.register(self.visit(node.rightNode, context))
+        if response.shouldReturn(): return response
 
         return response.proceed(getattr(left, node.operation.type)(right))
 
@@ -712,9 +745,12 @@ class Interpreter:
 
         for condition, expression in node.cases:
             conditionValue = response.register(self.visit(condition, context))
+            if response.shouldReturn(): return response
 
             if conditionValue.value != 0:
                 response.register(self.visit(expression, context))
+                if response.shouldReturn(): return response
+                
                 break
 
         return response.proceed(Int(0))
@@ -723,13 +759,21 @@ class Interpreter:
         response = RuntimeResult()
 
         startNode = response.register(self.visit(node.startValueNode, context))
+        if response.shouldReturn(): return response
+
         endNode   = response.register(self.visit(node.endValueNode  , context))
+        if response.shouldReturn(): return response
+
         stepNode  = response.register(self.visit(node.stepValueNode , context))
+        if response.shouldReturn(): return response
 
         for iterator in range(startNode.value, endNode.value, stepNode.value):
             context.symbols.set(node.variableNameToken.value, Int(iterator))
 
             response.register(self.visit(node.bodyNode, context))
+            if response.shouldReturn()  : return response
+            if response.shouldBreak   : break
+            if response.shouldContinue: continue
 
         return response.proceed(Int(0))
 
@@ -737,7 +781,11 @@ class Interpreter:
         response = RuntimeResult()
 
         while response.register(self.visit(node.conditionNode, context)).value != 0:
+
             response.register(self.visit(node.bodyNode, context))
+            if response.shouldReturn(): return response
+            if response.shouldBreak   : break
+            if response.shouldContinue: continue
 
         return response.proceed(Int(0))
 
@@ -745,17 +793,18 @@ class Interpreter:
         functionName = node.functionNameToken.value
         bodyNode     = node.bodyNode
         
-        functionValue = Function(functionName, node.argNameTokens, bodyNode)
+        function = Function(functionName, node.argNameTokens, bodyNode)
 
         if node.functionNameToken:
-            context.symbols.set(functionName, functionValue)
+            context.symbols.set(functionName, function)
 
-        return RuntimeResult().proceed(functionValue)
+        return RuntimeResult().proceed(function)
 
     def visitCallNode(self, node, context):
         response = RuntimeResult()
 
         valueToCall = response.register(self.visit(node.nodeToCall, context))
+        if response.shouldReturn(): return response
 
         args = [response.register(self.visit(argNode, context)) for argNode in node.argNodes]
 
@@ -763,8 +812,19 @@ class Interpreter:
             valueToCall.execute(args, context)
         )
 
-    # def visitReturnNode(self, node, context):
-    #     return self.visit(node.nodeToReturn, context) ???
+    def visitReturnNode(self, node, context):
+        response = RuntimeResult()
+
+        value = response.register(self.visit(node.nodeToReturn, context))
+        if response.shouldReturn(): return response
+
+        return response.proceedWithReturn(value)
+
+    def visitContinueNode(self, node, context):
+        return RuntimeResult().proceedWithContinue()
+
+    def visitBreakNode(self, node, context):
+        return RuntimeResult().proceedWithBreak()
 
 class Function:
     def __init__(self, name, argNames, bodyNode):
@@ -778,17 +838,19 @@ class Function:
         if len(args) < len(self.argNames):
             raise SyntaxError(f'Too few arguments given to "{self.name}".')
 
-        context = Context(self.name)
-        context.extend(upperContext)
+        context = Context(self.name, upperContext)
 
         for i in range(len(args)):
             argName  = self.argNames[i].value
             argValue = args[i]
             context.symbols.set(argName, argValue)
 
-        return RuntimeResult().proceed(
-            Interpreter(self.bodyNode).interpretate(context)
-        )
+        response = RuntimeResult()
+
+        value = response.register(Interpreter(self.bodyNode).interpretate(context))
+        if response.shouldReturn() and response.returnValue == None: return response
+        
+        return response.proceed(value if value else Int(0))
 
     def __repr__(self):
         return f'<function {self.name}>'
@@ -807,19 +869,20 @@ def main():
 
         # Return
         r"^\<\<\=": "RETURN",
+        r"^continue": "CONTINUE",
         
         # If, Else If, Else
         r"^\?\.\.": "IF",
         r"^\.\?\.": "ELSE_IF",
         r"^\.\.\?": "ELSE",
 
-        # Next
-        r"^(\.|\|)": "NEXT",
-
         # For loop
         r"^\!": "FOR",
         r"^\=\>": "ARROW",
         r"^\.\.": "STEP",
+
+        # Next
+        r"^\|": "NEXT",
 
         # While loop
         r"^\%": "WHILE",
@@ -884,16 +947,13 @@ def main():
         while True:
 
             tokens = Lexer(Tokens).lex(input(">>> "))
-
-            print("\nToken List: "); print(tokens)
-            for token in tokens: print(f'-- {token}')
+            print(f"\nToken List: {tokens}")
 
             ast = Parser(tokens).parse()
             print(f'\nAST: {ast}')
 
             result = Interpreter(ast).interpretate(context)
-            print(result)
-            # print(f'\nResult: {result} - {" - ".join([str(type(element)) for element in result.elements])}')
+            print(f'\nresult: {result.value}')
 
     else:
         with open(f'{sys.argv[1]}', 'r') as file:
