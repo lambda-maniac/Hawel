@@ -886,6 +886,7 @@ class BuiltInPrint:
     def execute(args, context): # WHY IS THIS WORKING? XDDDDDD
         if args[0].value == "-n": print(*args[1:], end = '')
         else                    : print(*args    , end = "\n")
+        # print(*args, end = "")
         
         return Int(0)
 
