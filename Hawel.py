@@ -4,7 +4,7 @@ class Token:
         self.value = value
 
     def match(self, _type):
-        return self.type in _type
+        return self.type == _type
 
     def __repr__(self):
         return f'["{self.value}": {self.type}]'
