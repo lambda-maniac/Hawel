@@ -502,10 +502,6 @@ class Context:
         self.contextName = name
         self.symbols     = SymbolTable(parent)
 
-    # def extend(self, other):
-    #     for name, value in other.symbols.symbols.items():
-    #         self.symbols.set(name, value)
-
 class Int:
     def __init__(self, value):
         self.value = value
@@ -628,8 +624,13 @@ class RuntimeResult:
         self.shouldContinue = False
     
     def register(self, response):
-        if     response.error : self.error = response.error
-        return response.value
+        if response.error          : self.error          = response.error
+        if response.value          : self.value          = response.value
+        if response.returnValue    : self.returnValue    = response.returnValue
+        if response.shouldBreak    : self.shouldBreak    = response.shouldBreak
+        if response.shouldContinue : self.shouldContinue = response.shouldContinue
+        
+        return self.value
 
     def proceed(self, value):
         self.value = value
@@ -654,7 +655,7 @@ class RuntimeResult:
     def shouldReturn(self):
         return (
             self.error       or 
-            self.returnValue or 
+            self.returnValue or
             self.shouldBreak or 
             self.shouldContinue
         )
@@ -690,8 +691,18 @@ class Interpreter:
         )
 
     def visitListNode(self, node, context):
-        return RuntimeResult().proceed(
-            List([self.visit(elementNode, context) for elementNode in node.nodeList])
+        response = RuntimeResult()
+        
+        visitedNodes = []
+        for elementNode in node.nodeList:
+            
+            visitedNode = response.register(self.visit(elementNode, context))
+            if response.shouldReturn(): return response
+
+            visitedNodes.append(visitedNode)
+
+        return response.proceed(
+            List(visitedNodes)
         )
 
     def visitVariableAccessNode(self, node, context):
@@ -729,7 +740,7 @@ class Interpreter:
 
         return response.proceed(value)
         
-    def visitBinOpNode(self, node, context):
+    def visitBinOpNode(self, node, context): ### DEBUGGING ###
         response = RuntimeResult()
 
         left  = response.register(self.visit(node.leftNode, context))
