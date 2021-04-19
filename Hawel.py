@@ -884,7 +884,8 @@ class BuiltInPrint:
     
     @staticmethod
     def execute(args, context): # WHY IS THIS WORKING? XDDDDDD
-        print(*args, end = '')
+        if args[0].value == "-n": print(*args[1:], end = '')
+        else                    : print(*args    , end = "\n")
         
         return Int(0)
 
@@ -905,6 +906,15 @@ class BuiltInInt:
     @staticmethod
     def execute(args, context): # Yeap, just going with it.
         return Int(int(args[0].value))
+
+    def __repr__(self):
+        return f'<{self.__class__}>'
+
+class BuiltInString:
+    
+    @staticmethod
+    def execute(args, context): # Yeap, just going with it.
+        return String(str(args[0].value))
 
     def __repr__(self):
         return f'<{self.__class__}>'
@@ -992,7 +1002,8 @@ def main():
         'pi'  : Int(3.14159265368979),
         'echo': BuiltInPrint(),
         'get' : BuiltInInput(),
-        'int' : BuiltInInt()
+        'int' : BuiltInInt(),
+        'str' : BuiltInString(),
     }
 
     context = Context('main')
