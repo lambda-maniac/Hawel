@@ -585,7 +585,7 @@ class Int:
         return Int(not self.value)
 
     def __repr__(self):
-        return f'{self.value}'
+        return f'.{self.value}'
 
 class String:
     def __init__(self, value):
@@ -612,7 +612,7 @@ class String:
             return Int(self.value != other.value)
     
     def __repr__(self):
-        return f'{self.value}'
+        return f'\'{self.value}\''
 
 class List:
     def __init__(self, elements):
@@ -642,12 +642,12 @@ class RuntimeResult:
     
     def register(self, response):
         if response.error          : self.error          = response.error
-        if response.value          : self.value          = response.value
+        # if response.value          : self.value          = response.value
         if response.returnValue    : self.returnValue    = response.returnValue
         if response.shouldBreak    : self.shouldBreak    = response.shouldBreak
         if response.shouldContinue : self.shouldContinue = response.shouldContinue
         
-        return self.value
+        return response.value
 
     def proceed(self, value):
         self.value = value
@@ -678,7 +678,7 @@ class RuntimeResult:
         )
 
     def __repr__(self):
-        return f'{self.value}'
+        return f'RTR::({self.value})'
 
 class Interpreter:
     def __init__(self, rootNode):
@@ -884,9 +884,7 @@ class BuiltInPrint:
     def execute(args, context): # WHY IS THIS WORKING? XDDDDDD
         print(*args, end = '')
         
-        return RuntimeResult().proceed(
-            Int(0)
-        )
+        return Int(0)
 
     def __repr__(self):
         return f'<{self.__class__}>'
@@ -895,20 +893,16 @@ class BuiltInInput:
     
     @staticmethod
     def execute(args, context): # WHY IS THIS WORKING ALSO? WTF XXDDDDDDDDD
-        return RuntimeResult().proceed(
-            String(input(*args))
-        )
+        return String(input(*args))
 
     def __repr__(self):
         return f'<{self.__class__}>'
 
-class BuiltInInt: ### NEED TO FIX RETURNING RTRESULT
+class BuiltInInt:
     
     @staticmethod
-    def execute(args, context): # I'm just going with it lel.
-        return RuntimeResult().proceed(
-            Int(args[0])
-        )
+    def execute(args, context): # Yeap, just going with it.
+        return Int(int(args[0].value))
 
     def __repr__(self):
         return f'<{self.__class__}>'
@@ -1013,7 +1007,7 @@ def main():
             print(f'\nAST: {ast}')
 
             result = Interpreter(ast).interpretate(context)
-            print(f'\nresult: {result.value}')
+            print(f'\nresult: {result}')
 
     else:
         with open(f'{sys.argv[1]}', 'r') as file:
