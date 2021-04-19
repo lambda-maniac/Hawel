@@ -642,12 +642,12 @@ class RuntimeResult:
     
     def register(self, response):
         if response.error          : self.error          = response.error
-        # if response.value          : self.value          = response.value
+        if response.value          : self.value          = response.value
         if response.returnValue    : self.returnValue    = response.returnValue
         if response.shouldBreak    : self.shouldBreak    = response.shouldBreak
         if response.shouldContinue : self.shouldContinue = response.shouldContinue
         
-        return response.value
+        return self.value
 
     def proceed(self, value):
         self.value = value
@@ -871,9 +871,11 @@ class Function:
         value = response.register(Interpreter(self.bodyNode).interpretate(context))
         if response.shouldReturn() and response.returnValue == None: return response
         
-        return response.proceed(
-            value if value else Int(0)
-        )
+        return value # if value else Int(0)
+
+        # return response.proceed(
+        #     value if value else Int(0)
+        # )
 
     def __repr__(self):
         return f'<function {self.name}>'
@@ -1000,7 +1002,7 @@ def main():
     if len(sys.argv) == 1:
         while True:
 
-            tokens = Lexer(Tokens).lex(input(">>> "))
+            tokens = Lexer(Tokens).lex(input("~%$ "))
             print(f"\nToken List: {tokens}")
 
             ast = Parser(tokens).parse()
