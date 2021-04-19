@@ -4,7 +4,7 @@ class Token:
         self.value = value
 
     def match(self, _type):
-        return self.type == _type
+        return self.type in _type
 
     def __repr__(self):
         return f'["{self.value}": {self.type}]'
@@ -135,6 +135,14 @@ class ReturnNode:
     def __repr__(self):
         return f'return::{self.nodeToReturn}'
 
+class ContinueNode:
+    def __init__(self): pass
+    def __repr__(self): return f'::continue'
+
+class BreakNode:
+    def __init__(self): pass
+    def __repr__(self): return f'::break'
+
 class CallNode:
     def __init__(self, nodeToCall, argNodes):
         self.nodeToCall = nodeToCall
@@ -180,6 +188,15 @@ class Parser:
         if self.currentToken.match("RETURN"):
             self.advance()
             return ReturnNode(self.expression())
+
+        if self.currentToken.match("CONTINUE"):
+            self.advance()
+            return ContinueNode()
+
+        if self.currentToken.match("BREAK"):
+            self.advance()
+            return BreakNode()
+
         return self.expression()
 
     def binOperation(self, leftTokenType, operations, rightTokenType):
@@ -660,10 +677,6 @@ class RuntimeResult:
             self.shouldContinue
         )
 
-    # def failure(self, error):
-    #     self.error = error
-    #     return self
-
     def __repr__(self):
         return f'{self.value}'
 
@@ -725,9 +738,6 @@ class Interpreter:
         if node.operator.type == 'NOT':
             return response.proceed(value.NOT())
 
-        # if node.operator.type in 'INCREMENT|DECREMENT':
-        #     return response.proceed(getattr(value, node.operator.type)())
-
         return response.proceed(value)
 
     def visitVariableNode(self, node, context):
@@ -740,7 +750,7 @@ class Interpreter:
 
         return response.proceed(value)
         
-    def visitBinOpNode(self, node, context): ### DEBUGGING ###
+    def visitBinOpNode(self, node, context):
         response = RuntimeResult()
 
         left  = response.register(self.visit(node.leftNode, context))
@@ -778,13 +788,13 @@ class Interpreter:
         stepNode  = response.register(self.visit(node.stepValueNode , context))
         if response.shouldReturn(): return response
 
-        for iterator in range(startNode.value, endNode.value, stepNode.value):
+        for iterator in range(startNode.value, endNode.value + 1, stepNode.value):
             context.symbols.set(node.variableNameToken.value, Int(iterator))
 
             response.register(self.visit(node.bodyNode, context))
-            if response.shouldReturn()  : return response
-            if response.shouldBreak   : break
-            if response.shouldContinue: continue
+            if response.shouldReturn() : return response
+            if response.shouldBreak    : break
+            if response.shouldContinue : continue
 
         return response.proceed(Int(0))
 
@@ -861,10 +871,36 @@ class Function:
         value = response.register(Interpreter(self.bodyNode).interpretate(context))
         if response.shouldReturn() and response.returnValue == None: return response
         
-        return response.proceed(value if value else Int(0))
+        return response.proceed(
+            value if value else Int(0)
+        )
 
     def __repr__(self):
         return f'<function {self.name}>'
+
+class BuiltInPrint:
+    
+    @staticmethod
+    def execute(args, context): # WHY IS THIS WORKING? XDDDDDD
+        print(*args, end = '')
+        
+        return RuntimeResult().proceed(
+            Int(0)
+        )
+
+    def __repr__(self):
+        return f'<{self.__class__}>'
+
+class BuiltInInput:
+    
+    @staticmethod
+    def execute(args, context): # WHY IS THIS WORKING ALSO? WTF XXDDDDDDDDD
+        return RuntimeResult().proceed(
+            String(input(*args))
+        )
+
+    def __repr__(self):
+        return f'<{self.__class__}>'
 
 def main():
 
@@ -880,7 +916,8 @@ def main():
 
         # Return
         r"^\<\<\=": "RETURN",
-        r"^continue": "CONTINUE",
+        r"^\>\>\>": "CONTINUE",
+        r"^\<\<\<": "BREAK",
         
         # If, Else If, Else
         r"^\?\.\.": "IF",
@@ -891,6 +928,20 @@ def main():
         r"^\!": "FOR",
         r"^\=\>": "ARROW",
         r"^\.\.": "STEP",
+
+        # Logic 
+        r"^\>\=": "GREATER_THAN_OR_EQUAL",
+        r"^\<\=": "LESS_THAN_OR_EQUAL",
+
+        r"^\>": "GREATER_THAN",
+        r"^\<": "LESS_THAN",
+
+        r"^\=\=": "EQUAL",
+        r"^\~\=": "NOT_EQUAL",
+
+        r"^\~": "NOT",
+        r"^\&\&": "AND",
+        r"^\|\|": "OR",
 
         # Next
         r"^\|": "NEXT",
@@ -910,7 +961,7 @@ def main():
         # Generics
         r"^\d+": "INT",
         r'^"[^"]*"': "STRING",
-        r"^[a-zA-Z_\']*[a-zA-Z0-9\']+": "IDENTIFIER",
+        r"^[a-zA-Z_\']*[a-zA-Z0-9_\']+": "IDENTIFIER",
 
         # Symbols #
         r"^\:": "ASSIGNMENT",
@@ -925,22 +976,6 @@ def main():
         r"^\^": "POW",
         r"^\(": "LEFT_PARENTHESIS",
         r"^\)": "RIGHT_PARENTHESIS",
-        
-
-        # Logic 
-        r"^\>\=": "GREATER_THAN_OR_EQUAL",
-        r"^\<\=": "LESS_THAN_OR_EQUAL",
-
-        r"^\>": "GREATER_THAN",
-        r"^\<": "LESS_THAN",
-
-        
-        r"^\=\=": "EQUAL",
-        r"^\~\=": "NOT_EQUAL",
-
-        r"^\~": "NOT",
-        r"^\&\&": "AND",
-        r"^\|\|": "OR",
     }
 
     # Setup Context
@@ -948,6 +983,8 @@ def main():
     {
         'null': Int(0),
         'pi'  : Int(3.14159265368979),
+        'echo': BuiltInPrint(),
+        'get' : BuiltInInput()
     }
 
     context = Context('main')
@@ -968,6 +1005,6 @@ def main():
 
     else:
         with open(f'{sys.argv[1]}', 'r') as file:
-            print(Interpreter(Parser(Lexer(Tokens).lex(file.read())).parse()).interpretate(context))
+            Interpreter(Parser(Lexer(Tokens).lex(file.read())).parse()).interpretate(context)
 
 if __name__ == '__main__': main()
