@@ -585,7 +585,7 @@ class Int:
         return Int(not self.value)
 
     def __repr__(self):
-        return f'.{self.value}'
+        return f'{self.value}'
 
 class String:
     def __init__(self, value):
@@ -612,7 +612,7 @@ class String:
             return Int(self.value != other.value)
     
     def __repr__(self):
-        return f'\'{self.value}\''
+        return f'{self.value}'
 
 class List:
     def __init__(self, elements):
