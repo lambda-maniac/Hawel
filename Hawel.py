@@ -902,6 +902,17 @@ class BuiltInInput:
     def __repr__(self):
         return f'<{self.__class__}>'
 
+class BuiltInInt: ### NEED TO FIX RETURNING RTRESULT
+    
+    @staticmethod
+    def execute(args, context): # I'm just going with it lel.
+        return RuntimeResult().proceed(
+            Int(args[0])
+        )
+
+    def __repr__(self):
+        return f'<{self.__class__}>'
+
 def main():
 
     import sys
@@ -984,7 +995,8 @@ def main():
         'null': Int(0),
         'pi'  : Int(3.14159265368979),
         'echo': BuiltInPrint(),
-        'get' : BuiltInInput()
+        'get' : BuiltInInput(),
+        'int' : BuiltInInt()
     }
 
     context = Context('main')
