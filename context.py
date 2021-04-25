@@ -7,7 +7,7 @@ class SymbolTable:
         value = self.symbols.get(name, None)
 
         if value == None and self.parent:
-            return self.parent.symbols.get(name)
+            return self.parent.symbolTable.get(name)
 
         return value
 
