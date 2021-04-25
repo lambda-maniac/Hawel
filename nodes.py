@@ -189,7 +189,7 @@ class CallNode:
             {
                 "call": {
                     "parameters": [argNode for argNode in self.argNodes],
-                    "on": self.nodeToCall.variable.value
+                    "on": self.nodeToCall
                 }
             }
         )
