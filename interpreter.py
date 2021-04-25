@@ -186,7 +186,7 @@ class Interpreter:
         functionName = node.functionNameToken.value
         bodyNode     = node.bodyNode
         
-        function = Function(functionName, node.argNameTokens, bodyNode)
+        function = Function(functionName, node.argNameTokens, bodyNode, context)
 
         if node.functionNameToken:
             context.symbolTable.set(functionName, function)
@@ -202,7 +202,7 @@ class Interpreter:
         args = [response.register(self.visit(argNode, context)) for argNode in node.argNodes]
 
         return response.proceed(
-            valueToCall.execute(args, context)
+            valueToCall.execute(args)
         )
 
     def visitReturnNode(self, node, context):
@@ -220,27 +220,28 @@ class Interpreter:
         return RuntimeResult().proceedWithBreak()
 
 class Function:
-    def __init__(self, name, argNames, bodyNode):
+    def __init__(self, name, argNames, bodyNode, context):
         self.name     = name
         self.argNames = argNames
         self.bodyNode = bodyNode
+        self.context  = context
 
-    def execute(self, args, upperContext):
+    def execute(self, args):
         if len(args) > len(self.argNames):
             raise SyntaxError(f'Too many arguments given to "{self.name}".')
         if len(args) < len(self.argNames):
             raise SyntaxError(f'Too few arguments given to "{self.name}".')
 
-        context = Context(self.name, upperContext)
+        self.context = Context(self.name, self.context)
 
         for i in range(len(args)):
             argName  = self.argNames[i].value
             argValue = args[i]
-            context.symbolTable.set(argName, argValue)
+            self.context.symbolTable.set(argName, argValue)
 
         response = RuntimeResult()
 
-        value = response.register(Interpreter(self.bodyNode).interpretate(context))
+        value = response.register(Interpreter(self.bodyNode).interpretate(self.context))
         if response.shouldReturn() and response.returnValue == None: return response
         
         return value # if value else Int(0)
@@ -255,7 +256,7 @@ class Function:
 class BuiltInPrint:
     
     @staticmethod
-    def execute(args, context): # WHY IS THIS WORKING? XDDDDDD
+    def execute(args, context):
         try:
             if args[0].value == "-n": print(*args[1:], end = '')
             else                    : print(*args    , end = "\n")
