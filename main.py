@@ -1,7 +1,7 @@
-from token       import Token
+from _token      import Token
 from lexer       import Lexer
 from nodes       import *
-from parser      import Parser
+from _parser     import Parser
 from context     import *
 from classes     import *
 from interpreter import *
@@ -13,7 +13,7 @@ def main():
     import json
 
     # Setup Context
-    context_main = Context('Hawel')
+    context_main = Context('main')
 
     context_main.symbolTable.symbols = \
     {
