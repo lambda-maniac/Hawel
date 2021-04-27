@@ -202,7 +202,7 @@ class Interpreter:
         args = [response.register(self.visit(argNode, context)) for argNode in node.argNodes]
 
         return response.proceed(
-            valueToCall.execute(args)
+            valueToCall.execute(args, context)
         )
 
     def visitReturnNode(self, node, context):
@@ -226,7 +226,7 @@ class Function:
         self.bodyNode = bodyNode
         self.context  = context
 
-    def execute(self, args):
+    def execute(self, args, _ = "<unused>"):
         if len(args) > len(self.argNames):
             raise SyntaxError(f'Too many arguments given to "{self.name}".')
         if len(args) < len(self.argNames):
@@ -245,10 +245,6 @@ class Function:
         if response.shouldReturn() and response.returnValue == None: return response
         
         return value # if value else Int(0)
-
-        # return response.proceed(
-        #     value if value else Int(0)
-        # )
 
     def __repr__(self):
         return f'<function {self.name}>'
