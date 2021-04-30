@@ -11,14 +11,14 @@ class RuntimeResult:
         self.returnValue    = None
         self.shouldBreak    = False
         self.shouldContinue = False
-    
+
     def register(self, response):
         if response.error          : self.error          = response.error
         if response.value          : self.value          = response.value
         if response.returnValue    : self.returnValue    = response.returnValue
         if response.shouldBreak    : self.shouldBreak    = response.shouldBreak
         if response.shouldContinue : self.shouldContinue = response.shouldContinue
-        
+
         return self.value
 
     def proceed(self, value):
@@ -226,7 +226,7 @@ class Function:
         self.bodyNode = bodyNode
         self.context  = context
 
-    def execute(self, args, _ = "<unused>"):
+    def execute(self, args, _: "<unused>"):
         if len(args) > len(self.argNames):
             raise SyntaxError(f'Too many arguments given to "{self.name}".')
         if len(args) < len(self.argNames):
