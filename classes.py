@@ -106,4 +106,4 @@ class List:
             return self.elements.pop(other.value)
 
     def __repr__(self):
-        return "{"+'; '.join([str(element) for element in self.elements])+"}"
+        return "{"+ '; '.join([str(element) for element in self.elements]) +"}"

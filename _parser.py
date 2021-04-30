@@ -226,21 +226,6 @@ class Parser:
         return self.binOperation(self.arithmeticExpression, "GREATER_THAN|LESS_THAN|GREATER_THAN_OR_EQUAL|LESS_THAN_OR_EQUAL|EQUAL|NOT_EQUAL", self.arithmeticExpression)
 
     def expression(self):
-        if self.currentToken.match("MAKE_VAR"):
-            self.advance()
-
-            if self.currentToken.type != "IDENTIFIER":
-                raise SyntaxError(f'Expected Identifier Token, got: {self.currentToken.type}.')
-
-            variableName = self.currentToken.value
-            self.advance()
-
-            if self.currentToken.type != "ASSIGNMENT":
-                raise SyntaxError(f'Expected ":" Token, got: {self.currentToken} of type {self.currentToken.type}.')
-            self.advance()
-
-            return VariableNode(variableName, self.expression())
-
         return self.binOperation(self.comparisonExpression, "AND|OR", self.comparisonExpression)
 
     def term(self):
@@ -303,6 +288,12 @@ class Parser:
 
         elif token.type == "IDENTIFIER":
             self.advance()
+
+            if self.currentToken.match("ASSIGNMENT"):
+                self.advance()
+
+                return VariableNode(token.value, self.expression())
+
             return VariableAccessNode(token)
 
         elif token.type == 'LEFT_PARENTHESIS':

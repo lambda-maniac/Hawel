@@ -3,8 +3,8 @@ TOKENS = \
     # Ignore
     r"^[\s+\n+]": None,
 
-    # Var
-    r"^\-\-": "MAKE_VAR",
+    # Var ~ Not needed anymore?
+    #r"^\-\-": "MAKE_VAR",
 
     # Return
     r"^\<\<\=": "RETURN",
