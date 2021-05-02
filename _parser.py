@@ -301,6 +301,10 @@ class Parser:
             self.advance()
             return UnaryOpNode(token, self.factor())
 
+        if token.match("LENGTH"):
+            self.advance()
+            return UnaryOpNode(token, self.factor())
+
         return self.power()
 
     def atom(self):

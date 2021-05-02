@@ -142,6 +142,9 @@ class Interpreter:
         if node.operator.type == 'NOT':
             return response.proceed(value.NOT())
 
+        if node.operator.type == 'LENGTH':
+            return response.proceed(value.length())
+
         return response.proceed(value)
 
     def visitVariableNode(self, node, context):
@@ -192,7 +195,7 @@ class Interpreter:
         stepNode  = response.register(self.visit(node.stepValueNode , context))
         if response.shouldReturn(): return response
 
-        for iterator in range(startNode.value, endNode.value + 1, stepNode.value):
+        for iterator in range(startNode.value, endNode.value, stepNode.value):
             context.symbolTable.set(node.variableNameToken.value, Int(iterator))
 
             response.register(self.visit(node.bodyNode, context))
@@ -286,8 +289,9 @@ class BuiltInPrint:
     @staticmethod
     def execute(args, context):
         try:
-            if args[0].value == "-n": print(*args[1:], end = '')
+            if args[0].value == "-n": print(*args[1:], end = ''  )
             else                    : print(*args    , end = "\n")
+        except AttributeError       : print(*args    , end = "\n")
         except IndexError           : print()
         
         return Int(0)

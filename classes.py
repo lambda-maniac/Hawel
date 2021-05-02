@@ -102,7 +102,7 @@ class String:
         return String(self.value)
     
     def __repr__(self):
-        return f'\"{self.value}\"'
+        return f'{self.value}'
 
 class List:
     def __init__(self, elements):
@@ -124,6 +124,9 @@ class List:
     def setItem(self, index, value):
         self.elements[index.value] = value
         return List(self.elements)
+
+    def length(self):
+        return Int(len(self.elements))
 
     def __repr__(self):
         return "{"+ '; '.join([str(element) for element in self.elements]) +"}"
