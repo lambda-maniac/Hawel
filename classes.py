@@ -110,7 +110,7 @@ class String:
         lValue              = [*self.value]
         lValue[index.value] = value.value
         self.value          = ''.join(lValue)
-        return String(self.value)
+        return self
     
     def __repr__(self):
         return f'{self.value}'
@@ -139,6 +139,10 @@ class List:
         if isinstance(other, List):
             return self.ADD(other)
 
+    def APPEND(self, other):
+        self.elements.append(other)
+        return self
+
     def getBy(self, from_, end):
         try:
             if from_.value == end.value:
@@ -149,7 +153,7 @@ class List:
 
     def setItem(self, index, value):
         self.elements[index.value] = value
-        return List(self.elements)
+        return self
 
     def length(self):
         return Int(len(self.elements))

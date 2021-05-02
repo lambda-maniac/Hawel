@@ -7,6 +7,7 @@ TOKENS = \
     r"^\<\<\<": "BREAK",
 
     r"^\<\$\>": "PREPEND",
+    r"^\<\*\>": "APPEND",
 
     r"^\?\.\.": "IF",
     r"^\.\?\.": "ELSE_IF",

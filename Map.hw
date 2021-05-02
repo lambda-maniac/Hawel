@@ -1,7 +1,7 @@
 'program': "Simple loop map function Example .Hw"
 | @map [f; list]
     $ ! n: 0 => #list
-        $ list<<n>> : f [list<<n>>]
+        $ list <*> f [list<<n>>]
     $
     | <<= list
 $
