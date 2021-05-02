@@ -3,8 +3,9 @@ from nodes  import *
 
 class Parser:
     def __init__(self, tokens):
-        self.tokens     = tokens
-        self.tokenIndex = -1
+        self.tokens       = tokens
+        self.tokenIndex   = -1
+        self.currentToken = Token("INT", "0")
 
         self.advance()
 
@@ -83,7 +84,7 @@ class Parser:
             if not self.currentToken.match("LEFT_BRACKET"):
                 raise SyntaxError(f'Expected Token: "[", got Token: "{self.currentToken.type}"')
         else:
-            functionName = Token("IDENTIFIER", "<Anonymous>")
+            functionName = Token("IDENTIFIER", "Anonymous")
 
             if not self.currentToken.match("LEFT_BRACKET"):
                 raise SyntaxError(f'Expected IDENTIFIER or "[", got Token: "{self.currentToken.type}"')

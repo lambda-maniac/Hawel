@@ -49,6 +49,9 @@ class RuntimeResult:
             self.shouldContinue
         )
 
+    def properFormat(self):
+        return f'{self.value}'[1:-1]
+
     def __repr__(self):
         return f'RTR::({self.value})'
 
@@ -94,7 +97,7 @@ class Interpreter:
         value = context.symbolTable.get(node.variable.value)
 
         if not value:
-            raise SyntaxError(f'Variable "{node.variable.value}" not declared.')
+            raise SyntaxError(f'Identifier "{node.variable.value}" not declared.')
 
         return RuntimeResult().proceed(value)
 
@@ -290,7 +293,7 @@ class Function:
         return value # if value else Int(0)
 
     def __repr__(self):
-        return f'<function {self.name}>'
+        return f'<function "{self.name}">'
 
 class BuiltInPrint:
     
@@ -305,7 +308,7 @@ class BuiltInPrint:
         return Int(0)
 
     def __repr__(self):
-        return f'<{self.__class__}>'
+        return f'{self.__class__}'
 
 class BuiltInInput:
     
@@ -314,7 +317,7 @@ class BuiltInInput:
         return String(input(*args))
 
     def __repr__(self):
-        return f'<{self.__class__}>'
+        return f'{self.__class__}'
 
 class BuiltInInt:
     
@@ -323,7 +326,7 @@ class BuiltInInt:
         return Int(int(args[0].value))
 
     def __repr__(self):
-        return f'<{self.__class__}>'
+        return f'{self.__class__}'
 
 class BuiltInString:
     
@@ -332,4 +335,4 @@ class BuiltInString:
         return String(str(args[0].value))
 
     def __repr__(self):
-        return f'<{self.__class__}>'
+        return f'{self.__class__}'
