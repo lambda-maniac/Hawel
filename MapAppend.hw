@@ -1,9 +1,10 @@
-'program': "Simple loop map function Example .Hw"
+'program': "Simple loop map function Example .Hw (Append)"
 | @map [f; list]
-    $ ! n: 0 => #list
-        $ list<<n>> : f [list<<n>>]
+    $ list' : {}
+    | ! n: 0 => #list
+        $ list' <*> f [list<<n>>]
     $
-    | <<= list
+    | <<= list'
 $
 | @main[void]
     $ list: {1; 2; 3; 4; 5}
