@@ -123,6 +123,23 @@ class BinOpNode:
             }
         )
 
+class TernaryNode:
+    def __init__(self, condition, caseTrueNode, caseFalseNode):
+        self.condition     = condition
+        self.caseTrueNode  = caseTrueNode
+        self.caseFalseNode = caseFalseNode
+
+    def __repr__(self):
+        return str(
+            {
+                "Ternay": {
+                    "condition": self.condition,
+                    "caseTrue": self.caseTrueNode,
+                    "caseFalse": self.caseFalseNode,
+                }
+            }
+        )
+
 class IfNode:
     def __init__(self, cases):
         self.cases = cases

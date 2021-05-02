@@ -32,7 +32,7 @@ class Shell:
 
     def blockOfCode(self):
         fullCode = ""
-        while ((command := input(self.in_)) != "$$$"):
+        while ((command := input(self.in_)) != "$$$$"):
             fullCode += command
             self.refreshBuffer()
         return fullCode
@@ -45,7 +45,7 @@ class Shell:
                 command = input(self.in_)
                 
                 if   command.upper() == "EXIT": break
-                elif command         == "$$$" : command = self.blockOfCode()
+                elif command         == "$$$$" : command = self.blockOfCode()
 
                 result = Interpreter(Parser(Lexer(TOKENS).lex(command)).parse()).interpretate(self.context).properFormat()
         

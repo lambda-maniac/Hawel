@@ -16,6 +16,9 @@ TOKENS = \
     r"^\.\?\.": "ELSE_IF",
     r"^\.\.\?": "ELSE",
 
+    r"^\:\:": "TERNARY",
+    r"^\-\-": "SWITCH",
+
     r"^\!": "FOR",
     r"^\=\>": "ARROW",
     r"^\.\.": "STEP",

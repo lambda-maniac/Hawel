@@ -181,6 +181,24 @@ class Parser:
 
         return ForNode(variableName, startValue, endValue, stepValue, body)
 
+    def ternaryExpression(self):
+        condition = self.expression()
+
+        if not self.currentToken.match("SWITCH"):
+            raise SyntaxError(f'Expected Token: "--", got Token: "{self.currentToken.type}"')
+        self.advance()
+
+        caseTrue = self.expression()
+
+        if not self.currentToken.match("SWITCH"):
+            raise SyntaxError(f'Expected Token: "--", got Token: "{self.currentToken.type}"')
+        self.advance()
+
+        caseFalse = self.expression()
+        self.advance()
+
+        return TernaryNode(condition, caseTrue, caseFalse)
+
     def ifExpression(self):
         cases     = []
 
@@ -339,6 +357,10 @@ class Parser:
         elif token.match("LEFT_CURLY"):
             self.advance()
             return self.listExpression()
+
+        elif token.match("TERNARY"):
+            self.advance()
+            return self.ternaryExpression()
 
         elif token.match("IF"):
             self.advance()

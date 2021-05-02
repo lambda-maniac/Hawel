@@ -27,24 +27,17 @@ def main():
 
     if len(sys.argv) == 1:
 
-        type_ = input("Debug mode? (Y/N): ")
+        while True:
 
-        if type_ in "yY":
-            while True:
+            tokens = Lexer(TOKENS).lex(input("<DEBUG> "))
+            print(f"\nToken List: {tokens}")
 
-                tokens = Lexer(TOKENS).lex(input("<DEBUG> "))
-                print(f"\nToken List: {tokens}")
+            ast = Parser(tokens).parse()
+            print(f'\nAST:\n{json.dumps(eval(ast.__repr__()), indent = 2)}')
 
-                ast = Parser(tokens).parse()
-                print(f'\nAST:\n{json.dumps(eval(ast.__repr__()), indent = 2)}')
-
-                result = Interpreter(ast).interpretate(context_main)
-                print(f'\nresult: {result}')
+            result = Interpreter(ast).interpretate(context_main)
+            print(f'\nresult: {result}')
         
-        else:
-            while True:
-                Interpreter(Parser(Lexer(TOKENS).lex(input(">=> "))).parse()).interpretate(context_main)
-
     else:
         with open(f'{sys.argv[1]}', 'r') as file:
             Interpreter(Parser(Lexer(TOKENS).lex(file.read())).parse()).interpretate(context_main)

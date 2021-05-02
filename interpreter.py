@@ -177,6 +177,23 @@ class Interpreter:
 
         return response.proceed(getattr(left, node.operation.type)(right))
 
+    def visitTernaryNode(self, node, context):
+        response = RuntimeResult()
+
+        condition = response.register(self.visit(node.condition, context))
+        if response.shouldReturn(): return response
+
+        if condition.value != 0:
+            case = response.register(self.visit(node.caseTrueNode, context))
+            if response.shouldReturn(): return response
+            
+            return response.proceed(case)
+        
+        case = response.register(self.visit(node.caseFalseNode, context))
+        if response.shouldReturn(): return response
+
+        return response.proceed(case)
+
     def visitIfNode(self, node, context):
         response = RuntimeResult()
 
