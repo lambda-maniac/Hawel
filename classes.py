@@ -28,6 +28,10 @@ class Int:
     def DECREMENT(self):
         return Int(self.value - 1)
 
+    def PREPEND(self, other):
+        if isinstance(other, List):
+            return List([self.value]).ADD(other)
+
     def GREATER_THAN(self, other):
         if isinstance(other, Int):
             return Int(self.value > other.value)
@@ -90,10 +94,17 @@ class String:
         if isinstance(other, String):
             return Int(self.value != other.value)
 
+    def PREPEND(self, other):
+        if isinstance(other, List):
+            return List([self.value]).ADD(other)
+
     def getBy(self, from_, end):
-        if from_.value == end.value:
-            return String(self.value[from_.value])
-        return String(self.value[from_.value:end.value])
+        try:
+            if from_.value == end.value:
+                return String(self.value[from_.value])
+            return String(self.value[from_.value:end.value])
+            
+        except IndexError: return String("")
 
     def setItem(self, index, value):
         lValue              = [*self.value]
@@ -115,11 +126,26 @@ class List:
     def POW(self, other):
         if isinstance(other, Int):
             return self.elements.pop(other.value)
+    
+    def EQUAL(self, other):
+        if isinstance(other, List):
+            return Int(self.elements == other.elements)
+
+    def NOT_EQUAL(self, other):
+        if isinstance(other, List):
+            return Int(self.elements != other.elements)
+
+    def PREPEND(self, other):
+        if isinstance(other, List):
+            return self.ADD(other)
 
     def getBy(self, from_, end):
-        if from_.value == end.value:
-            return self.elements[from_.value]
-        return List(self.elements[from_.value:end.value])
+        try:
+            if from_.value == end.value:
+                return self.elements[from_.value]
+            return List(self.elements[from_.value:end.value])
+
+        except IndexError: return List([])
 
     def setItem(self, index, value):
         self.elements[index.value] = value

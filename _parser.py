@@ -214,7 +214,7 @@ class Parser:
         return IfNode(cases)
 
     def arithmeticExpression(self):
-        return self.binOperation(self.term, "ADD|SUB", self.term)
+        return self.binOperation(self.term, "ADD|SUB|PREPEND", self.term)
 
     def comparisonExpression(self):
         if self.currentToken.match("NOT"):

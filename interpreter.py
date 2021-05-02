@@ -175,6 +175,8 @@ class Interpreter:
             conditionValue = response.register(self.visit(condition, context))
             if response.shouldReturn(): return response
 
+            if conditionValue == None: continue # Different types comparissons -> Always False
+
             if conditionValue.value != 0:
                 response.register(self.visit(expression, context))
                 if response.shouldReturn(): return response

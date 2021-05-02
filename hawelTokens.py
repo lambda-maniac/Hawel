@@ -6,6 +6,8 @@ TOKENS = \
     r"^\>\>\>": "CONTINUE",
     r"^\<\<\<": "BREAK",
 
+    r"^\<\$\>": "PREPEND",
+
     r"^\?\.\.": "IF",
     r"^\.\?\.": "ELSE_IF",
     r"^\.\.\?": "ELSE",
