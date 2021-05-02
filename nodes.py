@@ -72,17 +72,34 @@ class VariableAccessNode:
         )
 
 class GetNode:
-    def __init__(self, node, slices):
-        self.node   = node
-        self.slices = slices
+    def __init__(self, node, slicesNodes):
+        self.node        = node
+        self.slicesNodes = slicesNodes
 
     def __repr__(self):
         return str(
             {
                 "of": self.node,
                 "get": {
-                    "from": self.slices[0],
-                    "to": self.slices[1]
+                    "from": self.slicesNodes[0],
+                    "to": self.slicesNodes[1]
+                }
+            }
+        )
+
+class SetNode:
+    def __init__(self, node, indexNode, valueNode):
+        self.node      = node
+        self.indexNode = indexNode
+        self.valueNode = valueNode
+
+    def __repr__(self):
+        return str(
+            {
+                "of": self.node,
+                "set": {
+                    "index": self.indexNode,
+                    "to": self.valueNode
                 }
             }
         )

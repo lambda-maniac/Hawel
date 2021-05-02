@@ -104,14 +104,30 @@ class Interpreter:
         sliceNode = response.register(self.visit(node.node, context))
         if response.shouldReturn(): return response
         
-        from_ = response.register(self.visit(node.slices[0], context))
+        from_ = response.register(self.visit(node.slicesNodes[0], context))
         if response.shouldReturn(): return response
 
-        end = response.register(self.visit(node.slices[1], context))
+        end = response.register(self.visit(node.slicesNodes[1], context))
         if response.shouldReturn(): return response
 
         return response.proceed(
             sliceNode.getBy(from_, end)
+        )
+
+    def visitSetNode(self, node, context):
+        response = RuntimeResult()
+
+        nodeToSet = response.register(self.visit(node.node, context))
+        if response.shouldReturn(): return response
+
+        index = response.register(self.visit(node.indexNode, context))
+        if response.shouldReturn(): return response
+
+        value = response.register(self.visit(node.valueNode, context))
+        if response.shouldReturn(): return response
+
+        return response.proceed(
+            nodeToSet.setItem(index, value)
         )
 
     def visitUnaryOpNode(self, node, context):

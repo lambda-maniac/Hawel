@@ -94,6 +94,12 @@ class String:
         if from_.value == end.value:
             return String(self.value[from_.value])
         return String(self.value[from_.value:end.value])
+
+    def setItem(self, index, value):
+        lValue              = [*self.value]
+        lValue[index.value] = value.value
+        self.value          = ''.join(lValue)
+        return String(self.value)
     
     def __repr__(self):
         return f'\"{self.value}\"'
@@ -114,6 +120,10 @@ class List:
         if from_.value == end.value:
             return self.elements[from_.value]
         return List(self.elements[from_.value:end.value])
+
+    def setItem(self, index, value):
+        self.elements[index.value] = value
+        return List(self.elements)
 
     def __repr__(self):
         return "{"+ '; '.join([str(element) for element in self.elements]) +"}"

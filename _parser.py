@@ -253,12 +253,12 @@ class Parser:
 
         return argNodes
 
-    def slices(self): # <<0>> <<0\10>>
+    def slices(self):
         at = self.expression()
 
         if self.currentToken.match("BACK_SLASH"):
             self.advance()
-            
+
             return [at, self.expression()]
 
         return [at, at]
@@ -281,6 +281,11 @@ class Parser:
 
             if self.currentToken.match("RIGHT_SLICE"):
                 self.advance()
+
+                if self.currentToken.match("ASSIGNMENT") and slices[0] == slices[1]:
+                    self.advance()
+
+                    return SetNode(atom, slices[0], self.expression())
 
                 return GetNode(atom, slices)
             
