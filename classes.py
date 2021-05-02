@@ -89,9 +89,14 @@ class String:
     def NOT_EQUAL(self, other):
         if isinstance(other, String):
             return Int(self.value != other.value)
+
+    def getBy(self, from_, end):
+        if from_.value == end.value:
+            return String(self.value[from_.value])
+        return String(self.value[from_.value:end.value])
     
     def __repr__(self):
-        return f'{self.value}'
+        return f'\"{self.value}\"'
 
 class List:
     def __init__(self, elements):
@@ -104,6 +109,11 @@ class List:
     def POW(self, other):
         if isinstance(other, Int):
             return self.elements.pop(other.value)
+
+    def getBy(self, from_, end):
+        if from_.value == end.value:
+            return self.elements[from_.value]
+        return List(self.elements[from_.value:end.value])
 
     def __repr__(self):
         return "{"+ '; '.join([str(element) for element in self.elements]) +"}"

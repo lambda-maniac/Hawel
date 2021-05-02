@@ -253,6 +253,16 @@ class Parser:
 
         return argNodes
 
+    def slices(self): # <<0>> <<0\10>>
+        at = self.expression()
+
+        if self.currentToken.match("BACK_SLASH"):
+            self.advance()
+            
+            return [at, self.expression()]
+
+        return [at, at]
+
     def call(self):
         atom = self.atom()
 
@@ -263,6 +273,19 @@ class Parser:
 
             if reduce: stack = CallNode(stack, argNodes)
             else     : stack = CallNode(atom, argNodes); reduce = True
+
+        if self.currentToken.match("LEFT_SLICE"):
+            self.advance()
+
+            slices = self.slices()
+
+            if self.currentToken.match("RIGHT_SLICE"):
+                self.advance()
+
+                return GetNode(atom, slices)
+            
+            else: raise SyntaxError(f'Unexpected Token: "{self.currentToken.type}", ">>" expected.')
+
         
         return stack if stack else atom
 

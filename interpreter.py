@@ -98,6 +98,22 @@ class Interpreter:
 
         return RuntimeResult().proceed(value)
 
+    def visitGetNode(self, node, context):
+        response = RuntimeResult()
+
+        sliceNode = response.register(self.visit(node.node, context))
+        if response.shouldReturn(): return response
+        
+        from_ = response.register(self.visit(node.slices[0], context))
+        if response.shouldReturn(): return response
+
+        end = response.register(self.visit(node.slices[1], context))
+        if response.shouldReturn(): return response
+
+        return response.proceed(
+            sliceNode.getBy(from_, end)
+        )
+
     def visitUnaryOpNode(self, node, context):
         response = RuntimeResult()
 

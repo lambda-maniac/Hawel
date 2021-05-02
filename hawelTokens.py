@@ -25,6 +25,9 @@ TOKENS = \
     r"^\>\=": "GREATER_THAN_OR_EQUAL",
     r"^\<\=": "LESS_THAN_OR_EQUAL",
 
+    r"^\<\<": "LEFT_SLICE",
+    r"^\>\>": "RIGHT_SLICE",
+
     r"^\>": "GREATER_THAN",
     r"^\<": "LESS_THAN",
 
@@ -59,6 +62,7 @@ TOKENS = \
     r"^\:": "ASSIGNMENT",
     r"^\{": "LEFT_CURLY",
     r"^\}": "RIGHT_CURLY",
+    r"^\\": "BACK_SLASH",
 
     # Arithmetic
     r"^\-": "SUB",

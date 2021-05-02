@@ -71,6 +71,22 @@ class VariableAccessNode:
             }
         )
 
+class GetNode:
+    def __init__(self, node, slices):
+        self.node   = node
+        self.slices = slices
+
+    def __repr__(self):
+        return str(
+            {
+                "of": self.node,
+                "get": {
+                    "from": self.slices[0],
+                    "to": self.slices[1]
+                }
+            }
+        )
+
 class BinOpNode:
     def __init__(self, operation, leftNode, rightNode):
         self.operation = operation
