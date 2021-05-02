@@ -297,11 +297,7 @@ class Parser:
     def factor(self):
         token = self.currentToken
 
-        if token.type in "ADD|SUB":
-            self.advance()
-            return UnaryOpNode(token, self.factor())
-
-        if token.match("LENGTH"):
+        if token.type in "ADD|SUB|LENGTH|HEAD|TAIL":
             self.advance()
             return UnaryOpNode(token, self.factor())
 

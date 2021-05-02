@@ -145,6 +145,12 @@ class Interpreter:
         if node.operator.type == 'LENGTH':
             return response.proceed(value.length())
 
+        if node.operator.type == 'HEAD':
+            return response.proceed(value.head())
+
+        if node.operator.type == 'TAIL':
+            return response.proceed(value.tail())
+
         return response.proceed(value)
 
     def visitVariableNode(self, node, context):

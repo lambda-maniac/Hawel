@@ -111,6 +111,17 @@ class String:
         lValue[index.value] = value.value
         self.value          = ''.join(lValue)
         return self
+
+    def length(self):
+        return Int(len(self.value))
+
+    def head(self):
+        try              : return String(self.value[0])
+        except IndexError: return String("")
+    
+    def tail(self):
+        try              : return String(self.value[1:])
+        except IndexError: return String("")
     
     def __repr__(self):
         return f'{self.value}'
@@ -157,6 +168,14 @@ class List:
 
     def length(self):
         return Int(len(self.elements))
+
+    def head(self):
+        try              : return self.elements[0]
+        except IndexError: return List([])
+    
+    def tail(self):
+        try              : return List(self.elements[1:])
+        except IndexError: return List([])
 
     def __repr__(self):
         return "{"+ '; '.join([str(element) for element in self.elements]) +"}"

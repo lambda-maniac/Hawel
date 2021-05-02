@@ -9,6 +9,9 @@ TOKENS = \
     r"^\<\$\>": "PREPEND",
     r"^\<\*\>": "APPEND",
 
+    r"^\<\$": "HEAD",
+    r"^\<\*": "TAIL",
+
     r"^\?\.\.": "IF",
     r"^\.\?\.": "ELSE_IF",
     r"^\.\.\?": "ELSE",
