@@ -22,7 +22,7 @@ class Lexer:
                 if match == []: 
                     
                     if (tokenFailSafe := tokenFailSafe + 1) == len(self.tokens):
-                        raise SyntaxError (f'Invalid Token: "{self.string[self.cursor]}"')
+                        raise SyntaxError (f'Invalid Token: "{self.string[self.cursor]}" at {self.cursor}')
                     
                     continue
             

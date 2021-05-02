@@ -94,6 +94,9 @@ class String:
         if isinstance(other, String):
             return Int(self.value != other.value)
 
+    def NOT(self):
+        return String(self.value[::-1])
+
     def PREPEND(self, other):
         if isinstance(other, List):
             return List([self.value]).ADD(other)
@@ -145,6 +148,9 @@ class List:
     def NOT_EQUAL(self, other):
         if isinstance(other, List):
             return Int(self.elements != other.elements)
+
+    def NOT(self):
+        return List(self.elements[::-1])
 
     def PREPEND(self, other):
         if isinstance(other, List):
