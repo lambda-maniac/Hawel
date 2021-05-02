@@ -183,11 +183,12 @@ class Interpreter:
         condition = response.register(self.visit(node.condition, context))
         if response.shouldReturn(): return response
 
-        if condition.value != 0:
-            case = response.register(self.visit(node.caseTrueNode, context))
-            if response.shouldReturn(): return response
-            
-            return response.proceed(case)
+        if condition != None:
+            if condition.value != 0:
+                case = response.register(self.visit(node.caseTrueNode, context))
+                if response.shouldReturn(): return response
+                
+                return response.proceed(case)
         
         case = response.register(self.visit(node.caseFalseNode, context))
         if response.shouldReturn(): return response
