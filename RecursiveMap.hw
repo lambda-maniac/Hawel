@@ -1,7 +1,7 @@
 'program': "Simple recursive map function Example .Hw"
 | @map [f; list]
-    $ ?.. list<<0>> == {} $ <<= {}
-      ..? <<= f [list<<0>>] <$> map [f; list<<1\#list>>]
+    $ ?.. <$list == {} $ <<= {}
+      ..? <<= f [<$list] <$> map [f; <*list]
     $
 $
 | @main[void]
