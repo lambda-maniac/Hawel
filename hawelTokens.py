@@ -37,9 +37,9 @@ TOKENS = \
     r"^(function|def)": "FUNCTION",
     
     r"^(end|done|do|then)": "BLOCK",
-    r"^len": "LENGTH",
+    r"^length": "LENGTH",
 
-    r"^(as|is|\=)": "ASSIGNMENT",
+    r"^(as|is)": "ASSIGNMENT",
 
     # Vanilla
 
@@ -97,7 +97,7 @@ TOKENS = \
     r'^"[^"]*"': "STRING",
     r"^[a-zA-Z_\']*[a-zA-Z0-9_\']+": "IDENTIFIER",
 
-    r"^\:": "ASSIGNMENT",
+    r"^(\:|\=)": "ASSIGNMENT",
     r"^\{": "LEFT_CURLY",
     r"^\}": "RIGHT_CURLY",
     r"^\\": "BACK_SLASH",
