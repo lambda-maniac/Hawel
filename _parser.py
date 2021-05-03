@@ -195,7 +195,10 @@ class Parser:
         self.advance()
 
         caseFalse = self.expression()
-        self.advance()
+
+        # if not self.currentToken.match("END_TERNARY"):
+        #     raise SyntaxError(f'Expected Token: ";;", got Token: "{self.currentToken.type}"')
+        # self.advance()
 
         return TernaryNode(condition, caseTrue, caseFalse)
 

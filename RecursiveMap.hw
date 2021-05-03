@@ -1,13 +1,14 @@
 'program': "Simple recursive map function Example .Hw"
-| @map [f; list]
-    $ <<= :: <$list == {} 
-          -- {}
-          -- f [<$list] <$> map [f; <*list]
-    $
-$
+| (@map [f]
+    $ <<= (@[list]
+        $ <<= :: <$list == {}
+              -- {}
+              -- f [<$list] <$> map [f] [<*list] 
+    $)
+$)
 | @main[void]
     $ list: {1; 2; 3; 4; 5}
     | square: (@[n]$ <<= n * n $)
-    | echo [map [square; list]]
+    | echo [map [square][list]]
 $
 | main[null]

@@ -18,6 +18,7 @@ TOKENS = \
 
     r"^\:\:": "TERNARY",
     r"^\-\-": "SWITCH",
+    # r"^\;\;": "END_TERNARY",
 
     r"^\!": "FOR",
     r"^\=\>": "ARROW",
