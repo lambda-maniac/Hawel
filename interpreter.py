@@ -6,14 +6,12 @@ class RuntimeResult:
 
     def reset(self):
         self.value = None
-        self.error = None
 
         self.returnValue    = None
         self.shouldBreak    = False
         self.shouldContinue = False
 
     def register(self, response):
-        if response.error          : self.error          = response.error
         if response.value          : self.value          = response.value
         if response.returnValue    : self.returnValue    = response.returnValue
         if response.shouldBreak    : self.shouldBreak    = response.shouldBreak
@@ -42,12 +40,7 @@ class RuntimeResult:
         return self
 
     def shouldReturn(self):
-        return (
-            self.error       or 
-            self.returnValue or
-            self.shouldBreak or 
-            self.shouldContinue
-        )
+        return self.returnValue != None
 
     def properFormat(self):
         return f'{self.value}'[1:-1]
