@@ -105,7 +105,28 @@ list: {1, 2, 3, 4, 5} |
 list<<0>> : 0 |
     list is now {0, 2, 3, 4, 5}
 
-list<<2\4>>
+list<<2\4>> |
+    out: {2, 3}
+
+```
+Verbose:
+```
+list: {1, 2, 3, 4, 5};
+    this could be a String too.
+
+head list;
+    out: 1
+
+tail list;
+    out: {2, 3, 4, 5}
+
+length list;
+    out: 5
+
+list<<0>> is 0;
+    list is now {0, 2, 3, 4, 5}
+
+list<<2\4>>;
     out: {2, 3}
 
 ```
