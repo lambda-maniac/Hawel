@@ -176,6 +176,24 @@ class ForNode:
             }
         )
 
+class ForEachNode:
+    def __init__(self, variableNameToken, iterableNode, bodyNode):
+        self.variableNameToken = variableNameToken
+        self.iterableNode      = iterableNode
+        self.bodyNode          = bodyNode
+
+    def __repr__(self):
+        return str(
+            {
+                "for": {
+                    self.variableNameToken.value: {
+                        "of": self.iterableNode,
+                        "do": self.bodyNode
+                    }
+                }
+            }
+        )
+
 class WhileNode:
     def __init__(self, conditionNode, bodyNode):
         self.conditionNode = conditionNode

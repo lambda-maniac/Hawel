@@ -125,6 +125,10 @@ class String:
     def tail(self):
         try              : return String(self.value[1:])
         except IndexError: return String("")
+
+    def iter(self):
+        for char in self.value:
+            yield String(char)
     
     def __repr__(self):
         return f'{self.value}'
@@ -182,6 +186,10 @@ class List:
     def tail(self):
         try              : return List(self.elements[1:])
         except IndexError: return List([])
+
+    def iter(self):
+        for element in self.elements:
+            yield element
 
     def __repr__(self):
         return "{"+ '; '.join([str(element) for element in self.elements]) +"}"

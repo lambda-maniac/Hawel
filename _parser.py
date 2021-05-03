@@ -151,7 +151,24 @@ class Parser:
         self.advance()
 
         if self.currentToken.type != "ASSIGNMENT":
-            raise SyntaxError(f'Expected Token: ":", got Token: "{self.currentToken.type}"')
+            if self.currentToken.type != "OF":
+                raise SyntaxError(f'Expected Token: ":" or ";;", got Token: "{self.currentToken.type}"')
+            self.advance()
+            
+            iterable = self.expression()
+
+            if not self.currentToken.match("BLOCK"):
+                raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+            self.advance()
+
+            body = self.statements()
+
+            if not self.currentToken.match("BLOCK"):
+                raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+            self.advance()
+
+            return ForEachNode(variableName, iterable, body)
+
         self.advance()
 
         startValue = self.expression()

@@ -234,6 +234,22 @@ class Interpreter:
 
         return response.proceed(Int(0))
 
+    def visitForEachNode(self, node, context):
+        response = RuntimeResult()
+
+        iterable = response.register(self.visit(node.iterableNode, context))
+        if response.shouldReturn(): return response
+
+        for iterator in iterable.iter():
+            context.symbolTable.set(node.variableNameToken.value, iterator)
+
+            response.register(self.visit(node.bodyNode, context))
+            if response.shouldReturn() : return response
+            if response.shouldBreak    : break
+            if response.shouldContinue : continue
+
+        return response.proceed(Int(0))
+
     def visitWhileNode(self, node, context):
         response = RuntimeResult()
 
