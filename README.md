@@ -202,7 +202,7 @@ Verbose
 ```
 status: case 1 == 1
         select "Math Works, lel."
-        select "Wtf?";
+        otherwise "Wtf?";
 ```
 ## Loop statements:
 * ```<FOR>```'s can be substituted by either ```!``` or ```for```.

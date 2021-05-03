@@ -19,7 +19,7 @@ TOKENS = \
     r"^else": "ELSE",
 
     r"^case": "TERNARY",
-    r"^select": "SWITCH",
+    r"^(select|otherwise)": "SWITCH",
 
     r"^for": "FOR",
     r"^to": "ARROW",
