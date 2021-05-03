@@ -14,12 +14,14 @@ class Shell:
 
         self.context.symbolTable.symbols = \
         {
-            'null': Int(0),
-            'pi'  : Int(3.14159265368979),
-            'echo': BuiltInPrint(),
-            'get' : BuiltInInput(),
-            'int' : BuiltInInt(),
-            'str' : BuiltInString(),
+            'null' : Int(0),
+            'true' : Int(1),
+            'false': Int(0),
+            'pi'   : Int(3.14159265368979),
+            'echo' : BuiltInPrint(),
+            'get'  : BuiltInInput(),
+            'int'  : BuiltInInt(),
+            'str'  : BuiltInString(),
         }
 
         self.refreshBuffer()
@@ -44,7 +46,7 @@ class Shell:
             try:
                 command = input(self.in_)
                 
-                if   command.upper() == "EXIT": break
+                if   command.upper() == "EXIT" : break
                 elif command         == "$$$$" : command = self.blockOfCode()
 
                 result = Interpreter(Parser(Lexer(TOKENS).lex(command)).parse()).interpretate(self.context).properFormat()
