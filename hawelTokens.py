@@ -39,6 +39,8 @@ TOKENS = \
     r"^(end|done|do|then)": "BLOCK",
     r"^len": "LENGTH",
 
+    r"^(as|is|\=)": "ASSIGNMENT",
+
     # Vanilla
 
     r"^\<\<\=": "RETURN",
