@@ -40,7 +40,9 @@ class RuntimeResult:
         return self
 
     def shouldReturn(self):
-        return self.returnValue != None
+        return self.returnValue or \
+               self.shouldBreak or \
+               self.shouldContinue
 
     def properFormat(self):
         return f'{self.value}'[1:-1]
@@ -221,9 +223,9 @@ class Interpreter:
             context.symbolTable.set(node.variableNameToken.value, Int(iterator))
 
             response.register(self.visit(node.bodyNode, context))
+            if response.shouldContinue : response.reset(); continue
+            if response.shouldBreak    : response.reset(); break
             if response.shouldReturn() : return response
-            if response.shouldBreak    : break
-            if response.shouldContinue : continue
 
         return response.proceed(Int(0))
 
@@ -237,9 +239,9 @@ class Interpreter:
             context.symbolTable.set(node.variableNameToken.value, iterator)
 
             response.register(self.visit(node.bodyNode, context))
+            if response.shouldContinue : response.reset(); continue
+            if response.shouldBreak    : response.reset(); break
             if response.shouldReturn() : return response
-            if response.shouldBreak    : break
-            if response.shouldContinue : continue
 
         return response.proceed(Int(0))
 
@@ -249,9 +251,9 @@ class Interpreter:
         while response.register(self.visit(node.conditionNode, context)).value != 0:
 
             response.register(self.visit(node.bodyNode, context))
+            if response.shouldContinue : response.reset(); continue
+            if response.shouldBreak    : response.reset(); break
             if response.shouldReturn(): return response
-            if response.shouldBreak   : break
-            if response.shouldContinue: continue
 
         return response.proceed(Int(0))
 

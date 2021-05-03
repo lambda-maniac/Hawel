@@ -17,12 +17,14 @@ def main():
 
     context_main.symbolTable.symbols = \
     {
-        'null': Int(0),
-        'pi'  : Int(3.14159265368979),
-        'echo': BuiltInPrint(),
-        'get' : BuiltInInput(),
-        'int' : BuiltInInt(),
-        'str' : BuiltInString(),
+        'null' : Int(0),
+        'true' : Int(1),
+        'false': Int(0),
+        'pi'   : Int(3.14159265368979),
+        'echo' : BuiltInPrint(),
+        'get'  : BuiltInInput(),
+        'int'  : BuiltInInt(),
+        'str'  : BuiltInString(),
     }
 
     if len(sys.argv) == 1:
