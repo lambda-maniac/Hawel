@@ -1,6 +1,6 @@
 'program': "Simple Calculator Example .Hw"
 
-| @calculator[operator; a; b]
+| @calculator[operator, a, b]
     $ ?.. operator == "+" 
         $ <<= a + b
       .?. operator == "-"
@@ -16,6 +16,6 @@ $
     $ operator: get ["Enter a operator: "]
     | number__: int [get ["Enter a number: "]]
     | __number: int [get ["Enter another number: "]]
-    | echo [calculator [operator; number__; __number]]
+    | echo [calculator [operator, number__, __number]]
 $
 | main[]

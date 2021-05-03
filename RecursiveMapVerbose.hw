@@ -1,0 +1,17 @@
+'program': "Simple recursive map function Example .Hw (Verbose Syntax)";
+
+function map [f] do
+    return (function [list] do
+                return case head list == {}
+                       select {}
+                       select f [(head list)] prepend map [f] [(tail list)]
+            end)
+end;
+
+function main[] do
+    numbers: {1, 2, 3, 4, 5};
+    squareN: (function[n] do return n * n end);
+
+    echo [map [squareN][numbers]]
+
+end; main[]

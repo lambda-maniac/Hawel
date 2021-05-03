@@ -6,9 +6,9 @@
               -- f [<$list] <$> map [f] [<*list] 
     $)
 $)
-| @main[void]
-    $ list: {1; 2; 3; 4; 5}
-    | square: (@[n]$ <<= n * n $)
-    | echo [map [square][list]]
+| @main[]
+    $ numbers: {1, 2, 3, 4, 5}
+    | squareN: (@[n]$ <<= n * n $)
+    | echo [map [squareN][numbers]]
 $
-| main[null]
+| main[]

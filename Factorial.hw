@@ -6,4 +6,4 @@
         $
 $
 | n: int [get ["Enter a number: "]]
-| echo ["Factorial of"; n; "is"; factorial[n]]
+| echo ["Factorial of", n, "is", factorial[n]]
