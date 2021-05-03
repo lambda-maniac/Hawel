@@ -111,7 +111,7 @@ list<<2\4>> |
 ```
 Verbose:
 ```
-list: {1, 2, 3, 4, 5};
+list as {1, 2, 3, 4, 5};
     this could be a String too.
 
 head list;
