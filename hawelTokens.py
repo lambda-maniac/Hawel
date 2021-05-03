@@ -2,6 +2,45 @@ TOKENS = \
 {
     r"^[\s+\n+]": None,
 
+    # Verbose
+    
+    r"^return": "RETURN",
+    r"^continue": "CONTINUE",
+    r"^break": "BREAK",
+
+    r"^prepend": "PREPEND",
+    r"^append": "APPEND",
+
+    r"^head": "HEAD",
+    r"^tail": "TAIL",
+
+    r"^if": "IF",
+    r"^elif": "ELSE_IF",
+    r"^else": "ELSE",
+
+    r"^case": "TERNARY",
+    r"^select": "SWITCH",
+
+    r"^for": "FOR",
+    r"^to": "ARROW",
+    r"^of": "OF",
+    r"^by": "STEP",
+
+    r"^not": "NOT",
+    r"^and": "AND",
+    r"^or": "OR",
+
+    r"^endl": "NEXT",
+
+    r"^while": "WHILE",
+
+    r"^(function|def)": "FUNCTION",
+    
+    r"^(end|done|do|then)": "BLOCK",
+    r"^len": "LENGTH",
+
+    # Vanilla
+
     r"^\<\<\=": "RETURN",
     r"^\>\>\>": "CONTINUE",
     r"^\<\<\<": "BREAK",
@@ -40,12 +79,12 @@ TOKENS = \
     r"^\&\&": "AND",
     r"^\|\|": "OR",
 
-    r"^\|": "NEXT",
+    r"^(\;|\|)": "NEXT",
 
     r"^\%": "WHILE",
 
     r"^\@": "FUNCTION",
-    r"^\;": "SEPARATOR",
+    r"^\,": "SEPARATOR",
     r"^\[": "LEFT_BRACKET",
     r"^\]": "RIGHT_BRACKET",
     

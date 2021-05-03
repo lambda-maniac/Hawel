@@ -101,6 +101,11 @@ class String:
         if isinstance(other, List):
             return List([self.value]).ADD(other)
 
+    def APPEND(self, other):
+        if isinstance(other, String):
+            self.value += other.value
+            return self
+
     def getBy(self, from_, end):
         try:
             if from_.value == end.value:
@@ -192,4 +197,4 @@ class List:
             yield element
 
     def __repr__(self):
-        return "{"+ '; '.join([str(element) for element in self.elements]) +"}"
+        return "{"+ ', '.join([str(element) for element in self.elements]) +"}"

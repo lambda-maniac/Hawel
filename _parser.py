@@ -71,7 +71,7 @@ class Parser:
                 nodesList.append(self.expression())
 
             if self.currentToken.type != "RIGHT_CURLY":
-                raise SyntaxError(f'Expected ";" or "{"}"}", got Token: {self.currentToken.type}')
+                raise SyntaxError(f'Expected "," or "{"}"}", got Token: {self.currentToken.type}')
             self.advance()
         
         return ListNode(nodesList)
@@ -105,7 +105,7 @@ class Parser:
                 self.advance()
 
             if not self.currentToken.match("RIGHT_BRACKET"):
-                raise SyntaxError(f'Expected ";" or "]", got Token: "{self.currentToken.type}"')
+                raise SyntaxError(f'Expected "," or "]", got Token: "{self.currentToken.type}"')
             self.advance()
 
         else:
@@ -287,7 +287,7 @@ class Parser:
                 argNodes.append(self.expression())
 
             if self.currentToken.type != "RIGHT_BRACKET":
-                raise SyntaxError(f'Expected ";" or "]", got Token: {self.currentToken.type}')
+                raise SyntaxError(f'Expected "," or "]", got Token: {self.currentToken.type}')
             self.advance()
 
         return argNodes

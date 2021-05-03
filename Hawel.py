@@ -5,7 +5,7 @@ from _parser     import Parser
 from context     import *
 from classes     import *
 from interpreter import *
-from hawelTokens import TOKENS
+from hawelTokens import *
 
 def main():
 
