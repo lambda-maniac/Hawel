@@ -37,7 +37,7 @@ def main():
             print(f"\nToken List: {tokens}")
 
             ast = Parser(tokens).parse()
-            if ast.error: ReconstructError(code, tokens, ast).reconstruct(); break
+            if ast.error: ReconstructError(code, tokens, ast, "<stdin>").reconstruct(); break
 
             print(f'\nAST:\n{json.dumps(eval(ast.value.__repr__()), indent = 2)}')
 
@@ -52,7 +52,7 @@ def main():
 
             ast    = Parser(tokens).parse()
 
-            if ast.error: ReconstructError(code, tokens, ast).reconstruct(); exit(1)
+            if ast.error: ReconstructError(code, tokens, ast, sys.argv[1]).reconstruct(); exit(1)
 
             Interpreter(ast.value).interpretate(context_main)
 

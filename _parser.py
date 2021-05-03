@@ -32,10 +32,11 @@ class ParseResult:
         return f'{self.value}'
 
 class ReconstructError:
-    def __init__(self, code, tokens, parseResult):
+    def __init__(self, code, tokens, parseResult, where):
         self.code   = code
         self.tokens = tokens
         self.result = parseResult
+        self.where  = where
         
     def reconstruct(self):
         begin, end, line, position = self.result.where[0], self.result.where[1], self.result.where[2], self.result.where[3]
@@ -43,11 +44,10 @@ class ReconstructError:
         spacing = ' ' * (begin)
         pointTo = '^' * (end - begin + 1) 
 
-        print(f"Error: ({self.result.error}) in line: ({line}, {begin})")
+        print(f"Error: ({self.result.error}) in line: ({line}, {begin}) of \"{self.where}\".")
         print(f"{self.code[0:position]}")
         print(f"{spacing}{pointTo}", end = "")
         print(f"{self.code[position:]}")
-
 
 class Parser:
     def __init__(self, tokens):
@@ -163,7 +163,7 @@ class Parser:
             if not self.currentToken.match("LEFT_BRACKET"):
                 return response.failure(f'Expected Token: "[", got Token: "{self.currentToken.type}" ', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
         else:
-            functionName = Token("IDENTIFIER", "Anonymous", 0, 0)
+            functionName = Token("IDENTIFIER", "Anonymous", 0, 0, 0, 0)
 
             if not self.currentToken.match("LEFT_BRACKET"):
                 return response.failure(f'Expected IDENTIFIER or "[", got Token: "{self.currentToken.type}" ', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
@@ -276,7 +276,7 @@ class Parser:
             stepValue = response.register(self.expression())
             if response.shouldReturn(): return response
 
-        else: stepValue = IntNode(Token("INT", 1))
+        else: stepValue = IntNode(Token("INT", 1, 0, 0, 0, 0))
 
         if not self.currentToken.match("BLOCK"):
             return response.failure(f'Expected Token: "$", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
@@ -351,7 +351,7 @@ class Parser:
             statements = response.register(self.statements())
             if response.shouldReturn(): return response
 
-            cases.append((IntNode(Token("INT", 1)), statements))
+            cases.append((IntNode(Token("INT", 1, 0, 0, 0, 0)), statements))
         
         if not self.currentToken.match("BLOCK"):
             return response.failure(f'Expected Token: "$", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
