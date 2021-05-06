@@ -1,7 +1,7 @@
 from _token      import Token
 from lexer       import Lexer
 from nodes       import *
-from _parser     import *
+from _parser     import Parser
 from context     import *
 from classes     import *
 from interpreter import *
@@ -31,29 +31,17 @@ def main():
 
         while True:
 
-            code = input("<DEBUG> ")
-
-            tokens = Lexer(TOKENS).lex(code)
+            tokens = Lexer(TOKENS).lex(input("<DEBUG> "))
             print(f"\nToken List: {tokens}")
 
             ast = Parser(tokens).parse()
-            if ast.error: ReconstructError(code, tokens, ast, "<stdin>").reconstruct(); break
+            print(f'\nAST:\n{json.dumps(eval(ast.__repr__()), indent = 2)}')
 
-            print(f'\nAST:\n{json.dumps(eval(ast.value.__repr__()), indent = 2)}')
-
-            result = Interpreter(ast.value).interpretate(context_main)
+            result = Interpreter(ast).interpretate(context_main)
             print(f'\nresult: {result}')
         
     else:
         with open(f'{sys.argv[1]}', 'r') as file:
-            code   = file.read()
-
-            tokens = Lexer(TOKENS).lex(code)
-
-            ast    = Parser(tokens).parse()
-
-            if ast.error: ReconstructError(code, tokens, ast, sys.argv[1]).reconstruct(); exit(1)
-
-            Interpreter(ast.value).interpretate(context_main)
+            Interpreter(Parser(Lexer(TOKENS).lex(file.read())).parse()).interpretate(context_main)
 
 if __name__ == '__main__': main()
