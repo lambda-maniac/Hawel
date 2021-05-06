@@ -1,59 +1,11 @@
 from _token import Token
 from nodes  import *
 
-class ParseResult:
-    def __init__(self) : self.reset()
-
-    def reset(self):
-        self.value = None
-        self.error = None
-        self.where = None
-
-    def register(self, response):
-        if response.error: self.error = response.error
-        if response.where: self.where = response.where
-        if response.value: self.value = response.value
-        return self.value
-
-    def proceed(self, value):
-        self.value = value
-        return self
-
-    def failure(self, error, whereItHappened):
-        self.reset()
-        self.error = error
-        self.where = whereItHappened
-        return self
-
-    def shouldReturn(self):
-        return self.error != None
-
-    def __repr__(self):
-        return f'{self.value}'
-
-class ReconstructError:
-    def __init__(self, code, tokens, parseResult, where):
-        self.code   = code
-        self.tokens = tokens
-        self.result = parseResult
-        self.where  = where
-        
-    def reconstruct(self):
-        begin, end, line, position = self.result.where[0], self.result.where[1], self.result.where[2], self.result.where[3]
-
-        spacing = ' ' * (begin)
-        pointTo = '^' * (end - begin + 1) 
-
-        print(f"Error: ({self.result.error}) in line: ({line}, {begin}) of \"{self.where}\".")
-        print(f"{self.code[0:position]}")
-        print(f"{spacing}{pointTo}", end = "")
-        print(f"{self.code[position:]}")
-
 class Parser:
     def __init__(self, tokens):
         self.tokens       = tokens
         self.tokenIndex   = -1
-        self.currentToken = Token("INT", "0", 0, 0, 0, 0)
+        self.currentToken = Token("INT", "0")
 
         self.advance()
 
@@ -67,106 +19,75 @@ class Parser:
             self.currentToken = self.tokens[self.tokenIndex]
 
     def statements(self):
-        response = ParseResult()
+        statements = []
 
-        statement = response.register(self.statement())
-        if response.shouldReturn(): return response
-
-        statements = [statement]
+        statements.append(self.statement())
         while self.currentToken.match("NEXT"):
             self.advance()
+            statements.append(self.statement())
 
-            statement = response.register(self.statement())
-            if response.shouldReturn(): return response
-
-            statements.append(statement)
-
-        return response.proceed(ListNode(statements))
+        return ListNode(statements)
 
     def statement(self):
-        response = ParseResult()
-
         if self.currentToken.match("RETURN"):
             self.advance()
-
-            expression = response.register(self.expression())
-            if response.shouldReturn(): return response
-
-            return response.proceed(ReturnNode(expression))
+            return ReturnNode(self.expression())
 
         if self.currentToken.match("CONTINUE"):
             self.advance()
-            return response.proceed(ContinueNode())
+            return ContinueNode()
 
         if self.currentToken.match("BREAK"):
             self.advance()
-            return response.proceed(BreakNode())
+            return BreakNode()
 
-        expression = response.register(self.expression())
-        if response.shouldReturn(): return response
-
-        return response.proceed(expression)
+        return self.expression()
 
     def binOperation(self, leftTokenType, operations, rightTokenType):
-        response = ParseResult()
-
-        leftNode = response.register(leftTokenType())
-        if response.shouldReturn(): return response
+        leftNode = leftTokenType()
 
         while self.currentToken.type in operations:
             operationToken = self.currentToken
 
             self.advance()
 
-            rightNode = response.register(rightTokenType())
-            if response.shouldReturn(): return response
-            
+            rightNode = rightTokenType()
             leftNode  = BinOpNode(operationToken, leftNode, rightNode)
 
-        return response.proceed(leftNode)
+        return leftNode
 
     def listExpression(self):
-        response  = ParseResult()
-
         nodesList = []
 
         if self.currentToken.match("RIGHT_CURLY"):
             self.advance()
 
         else:
-            expression = response.register(self.expression())
-            if response.shouldReturn(): return response
-
-            nodesList.append(expression)
+            nodesList.append(self.expression())
 
             while self.currentToken.type == "SEPARATOR":
                 self.advance()
 
-                expression = response.register(self.expression())
-                if response.shouldReturn(): return response
-
-                nodesList.append(expression)
+                nodesList.append(self.expression())
 
             if self.currentToken.type != "RIGHT_CURLY":
-                return response.failure(f'Expected "," or "{"}"}", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+                raise SyntaxError(f'Expected "," or "{"}"}", got Token: {self.currentToken.type}')
             self.advance()
         
-        return response.proceed(ListNode(nodesList))
+        return ListNode(nodesList)
 
     def functionExpression(self):
-        response = ParseResult()
-
         if self.currentToken.type == "IDENTIFIER":
             functionName = self.currentToken
             self.advance()
 
             if not self.currentToken.match("LEFT_BRACKET"):
-                return response.failure(f'Expected Token: "[", got Token: "{self.currentToken.type}" ', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+                raise SyntaxError(f'Expected Token: "[", got Token: "{self.currentToken.type}"')
         else:
-            functionName = Token("IDENTIFIER", "Anonymous", 0, 0, 0, 0)
+            functionName = Token("IDENTIFIER", "Anonymous")
 
             if not self.currentToken.match("LEFT_BRACKET"):
-                return response.failure(f'Expected IDENTIFIER or "[", got Token: "{self.currentToken.type}" ', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+                raise SyntaxError(f'Expected IDENTIFIER or "[", got Token: "{self.currentToken.type}"')
         self.advance()
 
         argNameTokens = []
@@ -178,291 +99,216 @@ class Parser:
                 self.advance()
 
                 if self.currentToken.type != "IDENTIFIER":
-                    return response.failure(f'Expected IDENTIFIER, got: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+                    raise SyntaxError(f'Expected IDENTIFIER, got: "{self.currentToken.type}"')
 
                 argNameTokens.append(self.currentToken)
                 self.advance()
 
             if not self.currentToken.match("RIGHT_BRACKET"):
-                return response.failure(f'Expected "," or "]", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+                raise SyntaxError(f'Expected "," or "]", got Token: "{self.currentToken.type}"')
             self.advance()
 
         else:
             if not self.currentToken.match("RIGHT_BRACKET"):
-                return response.failure(f'Expected IDENTIFIER or "]", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+                raise SyntaxError(f'Expected IDENTIFIER or "]", got Token: "{self.currentToken.type}"')
             self.advance()
 
         if not self.currentToken.match("BLOCK"):
-            return response.failure(f'Expected "$", got: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+            raise SyntaxError(f'Expected "$", got: "{self.currentToken.type}"')
         self.advance()
 
-        body = response.register(self.statements())
-        if response.shouldReturn(): return response
+        body = self.statements()
 
         if not self.currentToken.match("BLOCK"):
-            return response.failure(f'Expected "$", got: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+            raise SyntaxError(f'Expected "$", got: "{self.currentToken.type}"')
         self.advance()
 
-        return response.proceed(FunctionDefinitionNode(
+        return FunctionDefinitionNode(
             functionName,
             argNameTokens,
             body
-        ))
+        )
 
     def whileExpression(self):
-        response = ParseResult()
-
-        condition = response.register(self.expression())
-        if response.shouldReturn(): return response
+        condition = self.expression()
 
         if not self.currentToken.match("BLOCK"):
-            return response.failure(f'Expected Token: "$", got Token: "{self.currentToken.type}" ', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
         self.advance()
 
-        body = response.register(self.statements())
-        if response.shouldReturn(): return response
+        body = self.statements()
 
         if not self.currentToken.match("BLOCK"):
-            return response.failure(f'Expected Token: "$", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
         self.advance()
 
-        return response.proceed(WhileNode(condition, body))
+        return WhileNode(condition, body)
 
     def forExpression(self):
-        response = ParseResult()
-
         if self.currentToken.type != "IDENTIFIER":
-            return response.failure(f'Expected IDENTIFIER, got: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
-        
+            raise SyntaxError(f'Expected IDENTIFIER, got: "{self.currentToken.type}"')
         variableName = self.currentToken
         self.advance()
 
         if self.currentToken.type != "ASSIGNMENT":
             if self.currentToken.type != "OF":
-                return response.failure(f'Expected Token: ":" or ";;", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+                raise SyntaxError(f'Expected Token: ":" or ";;", got Token: "{self.currentToken.type}"')
             self.advance()
             
-            iterable = response.register(self.expression())
-            if response.shouldReturn(): return response
+            iterable = self.expression()
 
             if not self.currentToken.match("BLOCK"):
-                return response.failure(f'Expected Token: "$", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+                raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
             self.advance()
 
-            body = response.register(self.statements())
-            if response.shouldReturn(): return response
+            body = self.statements()
 
             if not self.currentToken.match("BLOCK"):
-                return response.failure(f'Expected Token: "$", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+                raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
             self.advance()
 
-            return response.proceed(ForEachNode(variableName, iterable, body))
+            return ForEachNode(variableName, iterable, body)
 
         self.advance()
 
-        startValue = response.register(self.expression())
-        if response.shouldReturn(): return response
+        startValue = self.expression()
 
         if self.currentToken.type != "ARROW":
-            return response.failure(f'Expected Token: "=>", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+            raise SyntaxError(f'Expected Token: "=>", got Token: "{self.currentToken.type}"')
         self.advance()
 
-        endValue = response.register(self.expression())
-        if response.shouldReturn(): return response
+        endValue = self.expression()
 
         if self.currentToken.match("STEP"):
             self.advance()
 
-            stepValue = response.register(self.expression())
-            if response.shouldReturn(): return response
+            stepValue = self.expression()
 
-        else: stepValue = IntNode(Token("INT", 1, 0, 0, 0, 0))
-
-        if not self.currentToken.match("BLOCK"):
-            return response.failure(f'Expected Token: "$", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
-        self.advance()
-
-        body = response.register(self.statements())
-        if response.shouldReturn(): return response
+        else: stepValue = IntNode(Token("INT", 1))
 
         if not self.currentToken.match("BLOCK"):
-            return response.failure(f'Expected Token: "$", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
         self.advance()
 
-        return response.proceed(ForNode(variableName, startValue, endValue, stepValue, body))
+        body = self.statements()
+
+        if not self.currentToken.match("BLOCK"):
+            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+        self.advance()
+
+        return ForNode(variableName, startValue, endValue, stepValue, body)
 
     def ternaryExpression(self):
-        response = ParseResult()
-
-        condition = response.register(self.expression())
-        if response.shouldReturn(): return response
+        condition = self.expression()
 
         if not self.currentToken.match("SWITCH"):
-            return response.failure(f'Expected Token: "--", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+            raise SyntaxError(f'Expected Token: "--", got Token: "{self.currentToken.type}"')
         self.advance()
 
-        caseTrue = response.register(self.expression())
-        if response.shouldReturn(): return response
+        caseTrue = self.expression()
 
         if not self.currentToken.match("SWITCH"):
-            return response.failure(f'Expected Token: "--", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+            raise SyntaxError(f'Expected Token: "--", got Token: "{self.currentToken.type}"')
         self.advance()
 
-        caseFalse = response.register(self.expression())
-        if response.shouldReturn(): return response
+        caseFalse = self.expression()
 
-        return response.proceed(TernaryNode(condition, caseTrue, caseFalse))
+        # if not self.currentToken.match("END_TERNARY"):
+        #     raise SyntaxError(f'Expected Token: ";;", got Token: "{self.currentToken.type}"')
+        # self.advance()
+
+        return TernaryNode(condition, caseTrue, caseFalse)
 
     def ifExpression(self):
-        response  = ParseResult()
-
         cases     = []
 
-        condition = response.register(self.expression())
-        if response.shouldReturn(): return response
+        condition = self.expression()
 
         if not self.currentToken.match("BLOCK"):
-            return response.failure(f'Expected Token: "$", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
         self.advance()
 
-        statements = response.register(self.statements())
-        if response.shouldReturn(): return response
-
-        cases.append((condition, statements))
+        cases.append((condition, self.statements()))
 
         while self.currentToken.match('ELSE_IF'):
             self.advance()
 
-            condition = response.register(self.expression())
-            if response.shouldReturn(): return response
+            condition = self.expression()
             
             if not self.currentToken.match("BLOCK"):
-                return response.failure(f'Expected Token: "$", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+                raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
             self.advance()
 
-            statements = response.register(self.statements())
-            if response.shouldReturn(): return response
-
-            cases.append((condition, statements))
+            cases.append((condition, self.statements()))
 
         if self.currentToken.match("ELSE"):
             self.advance()
 
-            statements = response.register(self.statements())
-            if response.shouldReturn(): return response
-
-            cases.append((IntNode(Token("INT", 1, 0, 0, 0, 0)), statements))
+            cases.append((IntNode(Token("INT", 1)), self.statements()))
         
         if not self.currentToken.match("BLOCK"):
-            return response.failure(f'Expected Token: "$", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
         self.advance()
 
-        return response.proceed(IfNode(cases))
+        return IfNode(cases)
 
     def arithmeticExpression(self):
-        response = ParseResult()
-        
-        binOperation = response.register(self.binOperation(self.term, "ADD|SUB|PREPEND|APPEND", self.term))
-        if response.shouldReturn(): return response
-
-        return response.proceed(binOperation)
+        return self.binOperation(self.term, "ADD|SUB|PREPEND|APPEND", self.term)
 
     def comparisonExpression(self):
-        response = ParseResult()
-
         if self.currentToken.match("NOT"):
             operation = self.currentToken
             self.advance()
 
-            comparisonExpression = response.register(self.comparisonExpression())
-            if response.shouldReturn(): return response
+            return UnaryOpNode(operation, self.comparisonExpression())
 
-            return response.proceed(UnaryOpNode(operation, comparisonExpression))
-
-        binOperation = response.register(self.binOperation(self.arithmeticExpression, "GREATER_THAN|LESS_THAN|GREATER_THAN_OR_EQUAL|LESS_THAN_OR_EQUAL|EQUAL|NOT_EQUAL", self.arithmeticExpression))
-        if response.shouldReturn(): return response
-
-        return response.proceed(binOperation)
+        return self.binOperation(self.arithmeticExpression, "GREATER_THAN|LESS_THAN|GREATER_THAN_OR_EQUAL|LESS_THAN_OR_EQUAL|EQUAL|NOT_EQUAL", self.arithmeticExpression)
 
     def expression(self):
-        response = ParseResult()
-
-        binOperation = response.register(self.binOperation(self.comparisonExpression, "AND|OR", self.comparisonExpression))
-        if response.shouldReturn(): return response
-
-        return response.proceed(binOperation)
+        return self.binOperation(self.comparisonExpression, "AND|OR", self.comparisonExpression)
 
     def term(self):
-        response = ParseResult()
-
-        binOperation = response.register(self.binOperation(self.factor, "MUL|DIV", self.factor))
-        if response.shouldReturn(): return response
-
-        return response.proceed(binOperation)
+        return self.binOperation(self.factor, "MUL|DIV", self.factor)
 
     def power(self):
-        response = ParseResult()
-
-        binOperation = response.register(self.binOperation(self.call, "POW", self.factor))
-        if response.shouldReturn(): return response
-
-        return response.proceed(binOperation)
+        return self.binOperation(self.call, "POW", self.factor)
     
     def getArgs(self):
-        response = ParseResult()
-
         self.advance()
 
         argNodes = []
         if self.currentToken.type == "RIGHT_BRACKET":
             self.advance()
         else:
-            expression = response.register(self.expression())
-            if response.shouldReturn(): return response
-
-            argNodes.append(expression)
+            argNodes.append(self.expression())
             while self.currentToken.type == "SEPARATOR":
                 self.advance()
 
-                expression = response.register(self.expression())
-                if response.shouldReturn(): return response
-
-                argNodes.append(expression)
+                argNodes.append(self.expression())
 
             if self.currentToken.type != "RIGHT_BRACKET":
-                return response.failure(f'Expected "," or "]", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+                raise SyntaxError(f'Expected "," or "]", got Token: {self.currentToken.type}')
             self.advance()
 
-        return response.proceed(argNodes)
+        return argNodes
 
     def slices(self):
-        response = ParseResult()
-
-        at = response.register(self.expression())
-        if response.shouldReturn(): return response
+        at = self.expression()
 
         if self.currentToken.match("BACK_SLASH"):
             self.advance()
 
-            end = response.register(self.expression())
-            if response.shouldReturn(): return response
+            return [at, self.expression()]
 
-            return response.proceed([at, end])
-
-        return response.proceed([at, at])
+        return [at, at]
 
     def call(self):
-        response = ParseResult()
-
-        atom = response.register(self.atom())
-        if response.shouldReturn(): return response
+        atom = self.atom()
 
         stack  = None
         reduce = False
         while self.currentToken.type == "LEFT_BRACKET":
-
-            argNodes = response.register(self.getArgs())
-            if response.shouldReturn(): return response
+            argNodes = self.getArgs()
 
             if reduce: stack = CallNode(stack, argNodes)
             else     : stack = CallNode(atom, argNodes); reduce = True
@@ -470,8 +316,7 @@ class Parser:
         if self.currentToken.match("LEFT_SLICE"):
             self.advance()
 
-            slices = response.register(self.slices())
-            if response.shouldReturn(): return response
+            slices = self.slices()
 
             if self.currentToken.match("RIGHT_SLICE"):
                 self.advance()
@@ -479,47 +324,34 @@ class Parser:
                 if self.currentToken.match("ASSIGNMENT") and slices[0] == slices[1]:
                     self.advance()
 
-                    expression = response.register(self.expression())
-                    if response.shouldReturn(): return response
+                    return SetNode(atom, slices[0], self.expression())
 
-                    return response.proceed(SetNode(atom, slices[0], expression))
-
-                return response.proceed(GetNode(atom, slices))
+                return GetNode(atom, slices)
             
-            else: return response.failure(f'Expected ">>", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+            else: raise SyntaxError(f'Unexpected Token: "{self.currentToken.type}", ">>" expected.')
 
-        return response.proceed(stack) if stack else response.proceed(atom)
+        
+        return stack if stack else atom
 
     def factor(self):
-        response = ParseResult()
-
         token = self.currentToken
 
         if token.type in "ADD|SUB|LENGTH|HEAD|TAIL":
             self.advance()
+            return UnaryOpNode(token, self.factor())
 
-            factor = response.register(self.factor())
-            if response.shouldReturn(): return response
-
-            return response.proceed(UnaryOpNode(token, factor))
-
-        power = response.register(self.power())
-        if response.shouldReturn(): return response
-
-        return response.proceed(power)
+        return self.power()
 
     def atom(self):
-        response = ParseResult()
-
         token = self.currentToken
 
         if token.type == 'INT':
             self.advance()
-            return response.proceed(IntNode(token))
+            return IntNode(token)
 
         if token.type == 'STRING':
             self.advance()
-            return response.proceed(StringNode(token))
+            return StringNode(token)
 
         elif token.type == "IDENTIFIER":
             self.advance()
@@ -527,75 +359,43 @@ class Parser:
             if self.currentToken.match("ASSIGNMENT"):
                 self.advance()
 
-                expression = response.register(self.expression())
-                ############################################################################ NEED
-                # if response.shouldReturn: return response ### Why is it always returnin? # TO
-                ############################################################################ FIX
+                return VariableNode(token.value, self.expression())
 
-                return response.proceed(VariableNode(token.value, expression))
-
-            return response.proceed(VariableAccessNode(token))
+            return VariableAccessNode(token)
 
         elif token.type == 'LEFT_PARENTHESIS':
             self.advance()
-            
-            expression = response.register(self.expression())
-            if response.shouldReturn: return response
+            expression = self.expression()
 
             if self.currentToken.type == 'RIGHT_PARENTHESIS':
                 self.advance()
-
-                return response.proceed(expression)
+                return expression
 
             else:
-                return response.failure(f'Expected Token: ")", got Token: "{self.currentToken.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+                raise SyntaxError (f'Expected Token: ")", got Token: "{self.currentToken.type}"')
 
         elif token.match("LEFT_CURLY"):
             self.advance()
-
-            listExpression = response.register(self.listExpression())
-            if response.shouldReturn: return response
-
-            return response.proceed(listExpression)
+            return self.listExpression()
 
         elif token.match("TERNARY"):
             self.advance()
-
-            ternaryExpression = response.register(self.ternaryExpression())
-            if response.shouldReturn: return response
-
-            return response.proceed(ternaryExpression)
+            return self.ternaryExpression()
 
         elif token.match("IF"):
             self.advance()
-
-            ifExpression = response.register(self.ifExpression())
-            if response.shouldReturn: return response
-
-            return response.proceed(ifExpression)
+            return self.ifExpression()
 
         elif token.match("FOR"):
             self.advance()
-
-            forExpression = response.register(self.forExpression())
-            if response.shouldReturn: return response
-
-            return response.proceed(forExpression)
+            return self.forExpression()
 
         elif token.match("WHILE"):
             self.advance()
-
-            whileExpression = response.register(self.whileExpression())
-            if response.shouldReturn: return response
-
-            return response.proceed(whileExpression)
+            return self.whileExpression()
 
         elif token.match("FUNCTION"):
             self.advance()
+            return self.functionExpression()
 
-            functionExpression = response.register(self.functionExpression())
-            if response.shouldReturn: return response
-
-            return response.proceed(functionExpression)
-
-        return response.failure(f'Unexpected Token: "{token.type}"', (self.currentToken.begin, self.currentToken.end, self.currentToken.line, self.currentToken.position))
+        raise SyntaxError(f'Unexpected Token: "{token.type}"')
