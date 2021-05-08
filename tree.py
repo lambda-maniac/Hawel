@@ -14,6 +14,7 @@ def tree(node, indent = "", isLast = True):
         lastChild = tree_[len(tree_) - 1]
 
     except AttributeError: print(node); return
+    except IndexError    : print("")  ; return
 
     if  isinstance(node, Token)                  or \
         isinstance(node, IfNode)                 or \

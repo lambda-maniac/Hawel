@@ -6,16 +6,7 @@ class IntNode:
 
     def tree(self):
         return [self.token]
-
-    def __repr__(self):
-        return str(
-            {
-                "int": {
-                    "value": self.token.value
-                }
-            }
-        )
-
+        
 class StringNode:
     def __init__(self, token):
         self.token = token
@@ -25,15 +16,6 @@ class StringNode:
     def tree(self):
         return [self.token]
 
-    def __repr__(self):
-        return str(
-            {
-                "string": {
-                    "value": self.token.value
-                }
-            }
-        )
-
 class UnaryOpNode:
     def __init__(self, operator, node):
         self.operator = operator
@@ -41,16 +23,6 @@ class UnaryOpNode:
 
     def tree(self):
         return [self.operator, self.node]
-
-    def __repr__(self):
-        return str(
-            {
-                "UnaryOperation": {
-                    "operation": self.operator.type,
-                    "nodeToOperate": self.node
-                }
-            }
-        )
 
 class VariableNode:
     def __init__(self, name, valueNode):
@@ -60,16 +32,6 @@ class VariableNode:
     def tree(self):
         return [self.name, self.valueNode]
 
-    def __repr__(self):
-        return str(
-            {
-                "set": {
-                    "name": self.name,
-                    "to": self.valueNode
-                }
-            }
-        )
-
 class VariableAccessNode:
     def __init__(self, variable):
         self.variable = variable
@@ -77,33 +39,13 @@ class VariableAccessNode:
     def tree(self):
         return [self.variable]
 
-    def __repr__(self):
-        return str(
-            {
-                "get": {
-                    "name": self.variable.value
-                }
-            }
-        )
-
 class GetNode:
     def __init__(self, node, slicesNodes):
         self.node        = node
         self.slicesNodes = slicesNodes
 
     def tree(self):
-        return [self.slicesNodes, self.node]
-
-    def __repr__(self):
-        return str(
-            {
-                "of": self.node,
-                "get": {
-                    "from": self.slicesNodes[0],
-                    "to": self.slicesNodes[1]
-                }
-            }
-        )
+        return [ListNode(self.slicesNodes), self.node]
 
 class SetNode:
     def __init__(self, node, indexNode, valueNode):
@@ -114,17 +56,6 @@ class SetNode:
     def tree(self):
         return [self.node, self.indexNode, self.valueNode]
 
-    def __repr__(self):
-        return str(
-            {
-                "of": self.node,
-                "set": {
-                    "index": self.indexNode,
-                    "to": self.valueNode
-                }
-            }
-        )
-
 class BinOpNode:
     def __init__(self, operation, leftNode, rightNode):
         self.operation = operation
@@ -133,19 +64,6 @@ class BinOpNode:
 
     def tree(self):
         return [self.leftNode, self.operation, self.rightNode]
-
-    def __repr__(self):
-        return str(
-            {
-                "BinaryOperation": {
-                    "operation": self.operation.type,
-                    "operateOn": {
-                        "left": self.leftNode,
-                        "right": self.rightNode
-                    }
-                }
-            }
-        )
 
 class TernaryNode:
     def __init__(self, condition, caseTrueNode, caseFalseNode):
@@ -156,35 +74,16 @@ class TernaryNode:
     def tree(self):
         return [self.condition, self.caseTrueNode, self.caseFalseNode]
 
-    def __repr__(self):
-        return str(
-            {
-                "Ternay": {
-                    "condition": self.condition,
-                    "caseTrue": self.caseTrueNode,
-                    "caseFalse": self.caseFalseNode,
-                }
-            }
-        )
-
 class IfNode:
     def __init__(self, cases):
         self.cases = cases
 
     def tree(self):
-        return [[contidion, expression] for condition, expression in self.cases]
-
-    def __repr__(self):
-
-        ifDict = {"if": {}}; n = 0
+        cases = []
         for condition, expression in self.cases:
-            ifDict["if"][f"if_{str(n).zfill(3)}"] = {
-                "condition": condition,
-                "do": expression
-            }
-            n += 1
-
-        return str(ifDict)
+            cases.append(condition)
+            cases.append(expression)
+        return cases
 
 class ForNode:
     def __init__(self, variableNameToken, startValueNode, endValueNode, stepValueNode, bodyNode):
@@ -197,18 +96,6 @@ class ForNode:
     def tree(self):
         return [self.variableNameToken, self.startValueNode, self.endValueNode, self.stepValueNode, self.bodyNode]
 
-    def __repr__(self):
-        return str(
-            {
-                "for": {
-                    self.variableNameToken.value: self.startValueNode,
-                    "to": self.endValueNode,
-                    "by": self.stepValueNode,
-                    "do": self.bodyNode
-                }
-            }
-        )
-
 class ForEachNode:
     def __init__(self, variableNameToken, iterableNode, bodyNode):
         self.variableNameToken = variableNameToken
@@ -218,18 +105,6 @@ class ForEachNode:
     def tree(self):
         return [self.variableNameToken, self.iterableNode, self.bodyNode]
 
-    def __repr__(self):
-        return str(
-            {
-                "for": {
-                    self.variableNameToken.value: {
-                        "of": self.iterableNode,
-                        "do": self.bodyNode
-                    }
-                }
-            }
-        )
-
 class WhileNode:
     def __init__(self, conditionNode, bodyNode):
         self.conditionNode = conditionNode
@@ -237,16 +112,6 @@ class WhileNode:
 
     def tree(self):
         return [self.conditionNode, self.bodyNode]
-
-    def __repr__(self):
-        return str(
-            {
-                "while": {
-                    "condition": self.conditionNode,
-                    "do": self.bodyNode
-                }
-            }
-        )
 
 class FunctionDefinitionNode:
     def __init__(self, functionNameToken, argNameTokens, bodyNode):
@@ -257,17 +122,6 @@ class FunctionDefinitionNode:
     def tree(self):
         return [self.functionNameToken, self.argNameTokens, self.bodyNode]
 
-    def __repr__(self):
-        return str(
-            {
-                "function": {
-                    "name": self.functionNameToken.value,
-                    "arguments": [arg.value for arg in self.argNameTokens],
-                    "body": self.bodyNode
-                }
-            }
-        )
-
 class ReturnNode:
     def __init__(self, nodeToReturn):
         self.nodeToReturn = nodeToReturn
@@ -275,24 +129,13 @@ class ReturnNode:
     def tree(self):
         return [self.nodeToReturn]
 
-    def __repr__(self):
-        return str(
-            {
-                "return": {
-                    "value": self.nodeToReturn
-                }
-            }
-        )
-
 class ContinueNode:
     def __init__(self): pass
     def tree(self)    : return ["continue"]
-    def __repr__(self): return str({"proceedTo": "continue"})
 
 class BreakNode:
     def __init__(self): pass
     def tree(self)    : return ["break"]
-    def __repr__(self): return str({"proceedTo": "break"})
 
 class CallNode:
     def __init__(self, nodeToCall, argNodes):
@@ -300,17 +143,7 @@ class CallNode:
         self.argNodes   = argNodes
 
     def tree(self):
-        return [self.nodeToCall, self.argNodes]
-
-    def __repr__(self):
-        return str(
-            {
-                "call": {
-                    "parameters": [argNode for argNode in self.argNodes],
-                    "on": self.nodeToCall
-                }
-            }
-        )
+        return [self.nodeToCall, ListNode(self.argNodes)]
 
 class ListNode:
     def __init__(self, nodeList):
@@ -318,11 +151,3 @@ class ListNode:
 
     def tree(self):
         return [node for node in self.nodeList]
-
-    def __repr__(self):
-
-        nodes = {"Statements": []}
-        for node in self.nodeList:
-            nodes["Statements"].append(node)
-
-        return str(nodes)

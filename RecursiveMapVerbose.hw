@@ -4,7 +4,7 @@ function map [f] do
     return (function [list] do
                 return case head list == {}
                        select {}
-                       select f [(head list)] prepend map [f] [(tail list)]
+                       otherwise f [(head list)] prepend map [f] [(tail list)]
             end)
 end;
 

@@ -213,10 +213,6 @@ class Parser:
 
         caseFalse = self.expression()
 
-        # if not self.currentToken.match("END_TERNARY"):
-        #     raise SyntaxError(f'Expected Token: ";;", got Token: "{self.currentToken.type}"')
-        # self.advance()
-
         return TernaryNode(condition, caseTrue, caseFalse)
 
     def ifExpression(self):
@@ -300,7 +296,8 @@ class Parser:
 
             return [at, self.expression()]
 
-        return [at, at]
+        from copy import deepcopy # Ast Beautifulness
+        return [at, deepcopy(at)]
 
     def call(self):
         atom = self.atom()
@@ -321,7 +318,7 @@ class Parser:
             if self.currentToken.match("RIGHT_SLICE"):
                 self.advance()
 
-                if self.currentToken.match("ASSIGNMENT") and slices[0] == slices[1]:
+                if self.currentToken.match("ASSIGNMENT"):
                     self.advance()
 
                     return SetNode(atom, slices[0], self.expression())

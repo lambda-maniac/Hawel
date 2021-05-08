@@ -48,7 +48,7 @@ class RuntimeResult:
         return f'{self.value}'[1:-1]
 
     def __repr__(self):
-        return f'RTR::({self.value})'
+        return f'RTR::(\n    {self.value}\n)'
 
 class Interpreter:
     def __init__(self, rootNode):

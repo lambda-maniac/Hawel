@@ -43,7 +43,11 @@ def main():
             print(f'\nresult: {result}')
         
     else:
-        with open(f'{sys.argv[1]}', 'r') as file:
-            Interpreter(Parser(Lexer(TOKENS).lex(file.read())).parse()).interpretate(context_main)
+        if sys.argv[1] == "-a" or sys.argv[1] == "--ast":
+            with open(f'{sys.argv[2]}', 'r') as file:
+                print(f"{sys.argv[2]}"); tree(Parser(Lexer(TOKENS).lex(file.read())).parse(), indent = "    ")
+        else:
+            with open(f'{sys.argv[1]}', 'r') as file:
+                Interpreter(Parser(Lexer(TOKENS).lex(file.read())).parse()).interpretate(context_main)
 
 if __name__ == '__main__': main()

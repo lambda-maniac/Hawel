@@ -1,13 +1,13 @@
 'program': "Simple loop map function Example .Hw"
-| @map [f; list]
+| @map [f, list]
     $ ! n: 0 => #list
         $ list<<n>> : f [list<<n>>]
     $
     | <<= list
 $
 | @main[void]
-    $ list: {1; 2; 3; 4; 5}
+    $ list: {1, 2, 3, 4, 5}
     | square: (@[n]$ <<= n * n $)
-    | echo [map [square; list]]
+    | echo [map [square, list]]
 $
 | main[null]
