@@ -5,20 +5,20 @@ This is a basic language I made for **study purposes**. It has almost everything
 In Hawel, we have two types of syntaxes, one which is purely symbolic, and one more verbose. You can use both of them at the same time if you want.
 
 #### Per example, you can declare a function these ways:
-```
+```vb
 function foo [params] do 
     statements 
 end;
 ```
 Remembering that code blocks can be envolved by any type of delimiter, such as ```do```, ```then```, ```end``` or ```done```. So basically, you could have 
 atrocities like:
-```
+```vb
 function foo [params] end
     statements
 then;
 ```
 Following now, a more symbolic declaration:
-```
+```cs
 @foo [params] $
     statements
 $|
@@ -35,7 +35,7 @@ identifier <ASSIGNMENT> value <ENDL>
 ```
 ### Examples:
 Symbolic:
-```
+```cs
 integer: 10 |
 
 string: "Text" |
@@ -43,7 +43,7 @@ string: "Text" |
 list: {1, 2, 3, 4, 5} |
 ```
 Verbose:
-```
+```vb
 integer = 10;
 
 string as "Text";
@@ -89,7 +89,7 @@ list <APPEND> value <ENDL>
 ```
 ### Examples:
 Symbolic:
-```
+```cs
 list: {1, 2, 3, 4, 5} |
     this could be a String too.
 
@@ -116,7 +116,7 @@ list<<2\4>> |
 
 ```
 Verbose:
-```
+```vb
 list as {1, 2, 3, 4, 5};
     this could be a String too.
 
@@ -144,11 +144,11 @@ list<<2\4>>;
 ```
 ### Note:
 Although Hawel seems to only have support for ```int``` type, it has for ```float``` too. I was just too lazy to make it parse floats, so, if somehow you really need floats, you can get it by implementing a function like:
-```
+```cs
 @float [n] $ <<= n / 1 $;
 ```
 if you didn't understand what's above, here's a more "readable" version:
-```
+```vb
 function float [n] do
     return n / 1
 end;
@@ -175,7 +175,7 @@ end;
 ```
 ### Example:
 Symbolic:
-```
+```cs
 option: int [get ["Enter a option between 1 and 2 : "]];
 
 ?.. option == 1 $
@@ -185,7 +185,7 @@ option: int [get ["Enter a option between 1 and 2 : "]];
 ..? echo ["You selected another option."] $|
 ```
 Verbose:
-```
+```vb
 option: int[get ["Enter a option between 1 and 2 : "]];
 
 if option == 1 then
@@ -205,13 +205,13 @@ end;
 ```
 ### Examples:
 Symbolic:
-```
+```cs
 status: :: 1 == 1
         -- "Math Works, lel."
         -- "Wtf?"|
 ```
 Verbose
-```
+```vb
 status: case 1 == 1
         select "Math Works, lel."
         otherwise "Wtf?";
@@ -239,7 +239,7 @@ status: case 1 == 1
 ```
 ### Examples:
 Symbolic:
-```
+```cs
 ! number: 0 => 10 $ echo [number] $|
 
 ! number: 0 => 10 .. 2 $ echo [number] $|
@@ -253,12 +253,12 @@ number: 0;
 $|
 ```
 verbose:
-```
-for number: 0 to 10 do 
+```vb
+for number as 0 to 10 do 
     echo [number] 
 done;
 
-for number: 0 to 10 by 2 do
+for number as 0 to 10 by 2 do
     echo [number]
 done;
 
@@ -266,10 +266,10 @@ for number of {1, 2, 3, 4, 5, 6, 7, 8, 9, 10} do
     echo [number] 
 done;
 
-number: 0;
+number as 0;
 while number <= 10 do
     echo [number]; 
-    number: number + 1 
+    number is number + 1 
 done;
 ```
 ## Functions
@@ -287,13 +287,13 @@ done;
 ```
 ### Examples:
 Symbolic:
-```
+```cs
 @add [a, b] $
     <<== a + b
 $|
 ```
 Verbose:
-```
+```vb
 function add [a, b] do
     return a + b
 end;
