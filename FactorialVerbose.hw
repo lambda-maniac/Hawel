@@ -1,0 +1,8 @@
+'program': "Factorial Example .Hw (Verbose Syntax)";
+function factorial[n] do
+    return case n == 1
+           select n
+           otherwise n * factorial[n - 1]
+end;
+n: int [get ["Enter a number: "]];
+echo ["Factorial of", n, "is", factorial[n]]

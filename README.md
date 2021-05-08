@@ -99,6 +99,12 @@ list: {1, 2, 3, 4, 5} |
 <*list|
     out: {2, 3, 4, 5}
 
+0 <$> list|
+    out: {0, 1, 2, 3, 4, 5}
+
+list <*> 6|
+    list is now {1, 2, 3, 4, 5, 6}
+
 #list|
     out: 5
 
@@ -119,6 +125,12 @@ head list;
 
 tail list;
     out: {2, 3, 4, 5}
+
+0 prepend list;
+    out: {0, 1, 2, 3, 4, 5}
+
+list append 6;
+    list is now {1, 2, 3, 4, 5, 6}
 
 length list;
     out: 5
@@ -289,7 +301,7 @@ end;
 # That's all of the basics! Now you can torture yourself by trying the language!
 ## Here are some more complex examples:
 ### Factorial function - Hawel program:
-```
+```cs
 'program': "Factorial Example .hw"
 | @factorial[n]
     $ <<= :: n == 1
@@ -300,8 +312,20 @@ $
 | echo ["Factorial of", n, "is", factorial[n]]
 
 ```
-### Map function (loop) - Hawel program:
+### Factorial function (verbose syntax) - Hawel program:
+```vb
+'program': "Factorial Example .Hw (Verbose Syntax)";
+function factorial[n] do
+    return case n == 1
+           select n
+           otherwise n * factorial[n - 1]
+end;
+n: int [get ["Enter a number: "]];
+echo ["Factorial of", n, "is", factorial[n]]
+
 ```
+### Map function (loop) - Hawel program:
+```cs
 'prgram': "Map Example (loop) .hw"
 | @map [f; list]
     $ ! n: 0 => #list
@@ -316,8 +340,24 @@ $
 $
 | main[]
 ```
-### Map function (append-loop) - Hawel program:
+### Map function (loop, verbose syntax) - Hawel program:
+```vb
+'prgram': "Map Example (loop, verbose syntax) .hw"
+function map [f, list] do
+    for n as null to length list do
+        list<<n>> is f [list<<n>>]
+    done;
+    return list
+end;
+
+function main [] do
+    list as {1, 2, 3, 4, 5};
+    square as (function[n] do return n * n end);
+    echo [map [square, list]]
+end; main[]
 ```
+### Map function (append-loop) - Hawel program:
+```cs
 'program': "Map Example (append-loop) .hw"
 | @map [f; list]
     $ list' : {}
@@ -333,8 +373,25 @@ $
 $
 | main[]
 ```
-### Map function (recursive-currying) - Hawel program:
+### Map function (append-loop, verbose syntax) - Hawel program:
+```vb
+'program': "Map Example (append-loop, verbose syntax) .hw";
+function map [f, list] do
+    list' as {};
+    for element of list do
+        list' append f [element]
+    done;
+    return list'
+end;
+
+function main [] do
+    list as {1, 2, 3, 4, 5};
+    square as (function[n] do return n * n end);
+    echo [map [square, list]]
+end; main[]
 ```
+### Map function (recursive-currying) - Hawel program:
+```cs
 'program': "Map Example (recursive-currying) .hw"
 | (@map [f]
     $ <<= (@[list]
@@ -349,4 +406,24 @@ $)
     | echo [map [square] [numbers]]
 $
 | main[]
+```
+### Map function (recursive-currying, verbose syntax) - Hawel program:
+```vb
+'program': "Map Example (recursive-currying, verbose syntax) .hw";
+function map [f] do
+    return (function [list] do
+                return case head list == {}
+                       select {}
+                       otherwise f [(head list)] prepend map [f] [(tail list)]
+            end)
+end;
+
+function main[] do
+    numbers: {1, 2, 3, 4, 5};
+    squareN: (function[n] do return n * n end);
+
+    echo [map [squareN][numbers]]
+
+end; main[]
+
 ```
