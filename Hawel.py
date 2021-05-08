@@ -6,6 +6,7 @@ from context     import *
 from classes     import *
 from interpreter import *
 from hawelTokens import *
+from tree        import tree
 
 def main():
 
@@ -31,11 +32,12 @@ def main():
 
         while True:
 
-            tokens = Lexer(TOKENS).lex(input("<DEBUG> "))
-            print(f"\nToken List: {tokens}")
+            tokens = Lexer(TOKENS).lex(input("(Hwl)\n  └─"))
+            # print(f"\nToken List: {tokens}")
 
             ast = Parser(tokens).parse()
-            print(f'\nAST:\n{json.dumps(eval(ast.__repr__()), indent = 2)}')
+            tree(ast, indent="    ")
+            # print(f'\nAST:\n{json.dumps(eval(ast.__repr__()), indent = 2)}')
 
             result = Interpreter(ast).interpretate(context_main)
             print(f'\nresult: {result}')

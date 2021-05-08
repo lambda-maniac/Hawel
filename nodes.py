@@ -4,6 +4,9 @@ class IntNode:
 
         self.token.value = int(self.token.value)
 
+    def tree(self):
+        return [self.token]
+
     def __repr__(self):
         return str(
             {
@@ -19,6 +22,9 @@ class StringNode:
 
         self.token.value = self.token.value[1:-1:]
 
+    def tree(self):
+        return [self.token]
+
     def __repr__(self):
         return str(
             {
@@ -32,6 +38,9 @@ class UnaryOpNode:
     def __init__(self, operator, node):
         self.operator = operator
         self.node     = node
+
+    def tree(self):
+        return [self.operator, self.node]
 
     def __repr__(self):
         return str(
@@ -48,6 +57,9 @@ class VariableNode:
         self.name      = name
         self.valueNode = valueNode
 
+    def tree(self):
+        return [self.name, self.valueNode]
+
     def __repr__(self):
         return str(
             {
@@ -62,6 +74,9 @@ class VariableAccessNode:
     def __init__(self, variable):
         self.variable = variable
 
+    def tree(self):
+        return [self.variable]
+
     def __repr__(self):
         return str(
             {
@@ -75,6 +90,9 @@ class GetNode:
     def __init__(self, node, slicesNodes):
         self.node        = node
         self.slicesNodes = slicesNodes
+
+    def tree(self):
+        return [self.slicesNodes, self.node]
 
     def __repr__(self):
         return str(
@@ -93,6 +111,9 @@ class SetNode:
         self.indexNode = indexNode
         self.valueNode = valueNode
 
+    def tree(self):
+        return [self.node, self.indexNode, self.valueNode]
+
     def __repr__(self):
         return str(
             {
@@ -109,6 +130,9 @@ class BinOpNode:
         self.operation = operation
         self.leftNode  = leftNode
         self.rightNode = rightNode
+
+    def tree(self):
+        return [self.leftNode, self.operation, self.rightNode]
 
     def __repr__(self):
         return str(
@@ -129,6 +153,9 @@ class TernaryNode:
         self.caseTrueNode  = caseTrueNode
         self.caseFalseNode = caseFalseNode
 
+    def tree(self):
+        return [self.condition, self.caseTrueNode, self.caseFalseNode]
+
     def __repr__(self):
         return str(
             {
@@ -143,6 +170,9 @@ class TernaryNode:
 class IfNode:
     def __init__(self, cases):
         self.cases = cases
+
+    def tree(self):
+        return [[contidion, expression] for condition, expression in self.cases]
 
     def __repr__(self):
 
@@ -164,6 +194,9 @@ class ForNode:
         self.stepValueNode     = stepValueNode
         self.bodyNode          = bodyNode
 
+    def tree(self):
+        return [self.variableNameToken, self.startValueNode, self.endValueNode, self.stepValueNode, self.bodyNode]
+
     def __repr__(self):
         return str(
             {
@@ -182,6 +215,9 @@ class ForEachNode:
         self.iterableNode      = iterableNode
         self.bodyNode          = bodyNode
 
+    def tree(self):
+        return [self.variableNameToken, self.iterableNode, self.bodyNode]
+
     def __repr__(self):
         return str(
             {
@@ -199,6 +235,9 @@ class WhileNode:
         self.conditionNode = conditionNode
         self.bodyNode      = bodyNode
 
+    def tree(self):
+        return [self.conditionNode, self.bodyNode]
+
     def __repr__(self):
         return str(
             {
@@ -215,6 +254,9 @@ class FunctionDefinitionNode:
         self.argNameTokens     = argNameTokens
         self.bodyNode          = bodyNode
 
+    def tree(self):
+        return [self.functionNameToken, self.argNameTokens, self.bodyNode]
+
     def __repr__(self):
         return str(
             {
@@ -230,6 +272,9 @@ class ReturnNode:
     def __init__(self, nodeToReturn):
         self.nodeToReturn = nodeToReturn
 
+    def tree(self):
+        return [self.nodeToReturn]
+
     def __repr__(self):
         return str(
             {
@@ -241,16 +286,21 @@ class ReturnNode:
 
 class ContinueNode:
     def __init__(self): pass
+    def tree(self)    : return ["continue"]
     def __repr__(self): return str({"proceedTo": "continue"})
 
 class BreakNode:
     def __init__(self): pass
+    def tree(self)    : return ["break"]
     def __repr__(self): return str({"proceedTo": "break"})
 
 class CallNode:
     def __init__(self, nodeToCall, argNodes):
         self.nodeToCall = nodeToCall
         self.argNodes   = argNodes
+
+    def tree(self):
+        return [self.nodeToCall, self.argNodes]
 
     def __repr__(self):
         return str(
@@ -265,6 +315,9 @@ class CallNode:
 class ListNode:
     def __init__(self, nodeList):
         self.nodeList = nodeList
+
+    def tree(self):
+        return [node for node in self.nodeList]
 
     def __repr__(self):
 

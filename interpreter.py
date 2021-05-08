@@ -329,9 +329,9 @@ class BuiltInPrint:
     @staticmethod
     def execute(args, context):
         try:
-            if args[0].value == "-n": print(*args[1:], end = ''  )
-            else                    : print(*args    , end = "\n")
-        except AttributeError       : print(*args    , end = "\n")
+            if args[0].value == "-n": print(*args[1:] , end = ''  )
+            else                    : print(''.join([str(arg) for arg in args]), end = "\n")
+        except AttributeError       : print(''.join([str(arg) for arg in args]), end = "\n")
         except IndexError           : print()
         
         return Int(0)

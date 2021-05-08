@@ -6,6 +6,10 @@ class Token:
     def match(self, _type):
         return self.type == _type
 
+    def tree(self):
+        return [f'{self.type}: {self.value}']
+
+
     def __repr__(self):
         return str(
             {
