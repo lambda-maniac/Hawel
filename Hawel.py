@@ -41,14 +41,19 @@ def main():
                 result = Interpreter(ast).interpretate(context_main)
                 print(f'\nresult: {result}')
                 
-            except ParsingError as e: e.showError("(Hwl)", code)
+            except HParsingError as e: e.showError("(Hwl)", code)
+            except HRuntimeError as e: e.showError("(Hwl)", code)
         
     else:
         try:
             with open(f'{sys.argv[1]}', 'r') as file:
                 Interpreter(Parser(Lexer(TOKENS).lex(file.read())).parse()).interpretate(context_main)
         
-        except ParsingError as e:
+        except HParsingError as e:
+            with open(f'{sys.argv[1]}', 'r') as file:
+                e.showError(file.name, file.read())
+
+        except HRuntimeError as e:
             with open(f'{sys.argv[1]}', 'r') as file:
                 e.showError(file.name, file.read())
 

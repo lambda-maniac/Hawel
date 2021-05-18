@@ -1,6 +1,37 @@
 from classes import *
 from context import *
 
+class HRuntimeError (Exception):
+
+    def __init__(self, message, token, contextName):
+        self.message     = message
+        self.token       = token
+        self.contextName = contextName
+
+    def showError(self, context, code):
+        # Just Some Coloring
+        Red     = "\x1b[38;2;251;73;52m"
+        Purple  = "\x1b[38;2;211;134;155m"
+        Cyan    = "\x1b[38;2;142;192;124m"
+        Orange  = "\x1b[38;2;254;128;25m"
+        Default = "\x1b[0m"
+
+        print(f'\n[{Cyan}{context}{Default}:{Purple}{self.token.line}{Default}:{Purple}{self.token.begin}{Default}] Context: {Cyan}{self.contextName}{Default}: ({Orange}Execution{Default}) {Red}Error{Default}: {self.message}.\n')
+
+        spacing = ' ' * (self.token.begin)
+        pointTo = '^' * (self.token.end - self.token.begin + 1) 
+        nLength = " " * len(str(self.token.line))
+
+        line = code.split("\n")[self.token.line - 1]
+        line = list(line)
+        line.insert(self.token.begin  , Orange )
+        line.insert(self.token.end + 2, Default)
+        line = ''.join(line)
+
+        print(f' {nLength} | ')
+        print(f' {Purple}{self.token.line}{Default} | {line}')
+        print(f' {nLength} | {Red}{spacing}{pointTo}{Default}\n')
+
 class RuntimeResult:
     def __init__(self) : self.reset()
 
@@ -92,7 +123,7 @@ class Interpreter:
         value = context.symbolTable.get(node.variable.value)
 
         if not value:
-            raise SyntaxError(f'Identifier "{node.variable.value}" not declared.')
+            raise HRuntimeError(f'Identifier "{node.variable.value}" not declared. (Yet?)', node.variable, context.contextName)
 
         return RuntimeResult().proceed(value)
 
@@ -258,13 +289,13 @@ class Interpreter:
         return response.proceed(Int(0))
 
     def visitFunctionDefinitionNode(self, node, context):
-        functionName = node.functionNameToken.value
+        functionName = node.functionNameToken
         bodyNode     = node.bodyNode
         
         function = Function(functionName, node.argNameTokens, bodyNode, context)
 
         if node.functionNameToken:
-            context.symbolTable.set(functionName, function)
+            context.symbolTable.set(functionName.value, function)
 
         return RuntimeResult().proceed(function)
 
@@ -277,7 +308,7 @@ class Interpreter:
         args = [response.register(self.visit(argNode, context)) for argNode in node.argNodes]
 
         return response.proceed(
-            valueToCall.execute(args, context)
+            valueToCall.execute(args, context, node.nodeToCall)
         )
 
     def visitReturnNode(self, node, context):
@@ -301,11 +332,11 @@ class Function:
         self.bodyNode = bodyNode
         self.context  = context
 
-    def execute(self, args, _: "<unused>"):
+    def execute(self, args, _: "<unused>", where):
         if len(args) > len(self.argNames):
-            raise SyntaxError(f'Too many arguments given to "{self.name}".')
+            raise HRuntimeError(f'Too many arguments given to "{self.name.value}"', where.variable, self.context.contextName)
         if len(args) < len(self.argNames):
-            raise SyntaxError(f'Too few arguments given to "{self.name}".')
+            raise HRuntimeError(f'Too few arguments given to "{self.name.value}"', where.variable, self.context.contextName)
 
         self.context = Context(self.name, self.context)
 
@@ -322,7 +353,7 @@ class Function:
         return value # if value else Int(0)
 
     def __repr__(self):
-        return f'<function "{self.name}">'
+        return f'<function "{self.name.value}">'
 
 class BuiltInPrint:
     

@@ -1,7 +1,7 @@
 from _token import Token
 from nodes  import *
 
-class ParsingError (Exception):
+class HParsingError (Exception):
 
     def __init__(self, message, token):
         self.message = message
@@ -15,7 +15,7 @@ class ParsingError (Exception):
         Orange  = "\x1b[38;2;254;128;25m"
         Default = "\x1b[0m"
 
-        print(f'\n[{Cyan}{context}{Default}:{Purple}{self.token.line}{Default}:{Purple}{self.token.begin}{Default}:{Purple}{self.token.end}{Default}] {Red}Error{Default}: {self.message}.\n')
+        print(f'\n[{Cyan}{context}{Default}:{Purple}{self.token.line}{Default}:{Purple}{self.token.begin}{Default}] ({Orange}Parsing{Default}) {Red}Error{Default}: {self.message}.\n')
 
         spacing = ' ' * (self.token.begin)
         pointTo = '^' * (self.token.end - self.token.begin + 1) 
@@ -29,7 +29,7 @@ class ParsingError (Exception):
 
         print(f' {nLength} | ')
         print(f' {Purple}{self.token.line}{Default} | {line}')
-        print(f' {nLength} | {Red}{spacing}{pointTo}{Default}')
+        print(f' {nLength} | {Red}{spacing}{pointTo}{Default}\n')
 
 
 class Parser:
@@ -102,7 +102,7 @@ class Parser:
                 nodesList.append(self.expression())
 
             if self.currentToken.type != "RIGHT_CURLY":
-                raise ParsingError(f'Expected "," or "{"}"}", got Token: {self.currentToken.type}', self.currentToken)
+                raise HParsingError(f'Expected "," or "{"}"}", got Token: {self.currentToken.type}', self.currentToken)
             self.advance()
         
         return ListNode(nodesList)
@@ -113,12 +113,12 @@ class Parser:
             self.advance()
 
             if not self.currentToken.match("LEFT_BRACKET"):
-                raise ParsingError(f'Expected Token: "[", got Token: "{self.currentToken.type}"', self.currentToken)
+                raise HParsingError(f'Expected Token: "[", got Token: "{self.currentToken.type}"', self.currentToken)
         else:
             functionName = Token("IDENTIFIER", "Anonymous", 0, 0, 0, 0)
 
             if not self.currentToken.match("LEFT_BRACKET"):
-                raise ParsingError(f'Expected IDENTIFIER or "[", got Token: "{self.currentToken.type}"', self.currentToken)
+                raise HParsingError(f'Expected IDENTIFIER or "[", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         argNameTokens = []
@@ -130,28 +130,28 @@ class Parser:
                 self.advance()
 
                 if self.currentToken.type != "IDENTIFIER":
-                    raise ParsingError(f'Expected IDENTIFIER, got: "{self.currentToken.type}"', self.currentToken)
+                    raise HParsingError(f'Expected IDENTIFIER, got: "{self.currentToken.type}"', self.currentToken)
 
                 argNameTokens.append(self.currentToken)
                 self.advance()
 
             if not self.currentToken.match("RIGHT_BRACKET"):
-                raise ParsingError(f'Expected "," or "]", got Token: "{self.currentToken.type}"', self.currentToken)
+                raise HParsingError(f'Expected "," or "]", got Token: "{self.currentToken.type}"', self.currentToken)
             self.advance()
 
         else:
             if not self.currentToken.match("RIGHT_BRACKET"):
-                raise ParsingError(f'Expected IDENTIFIER or "]", got Token: "{self.currentToken.type}"', self.currentToken)
+                raise HParsingError(f'Expected IDENTIFIER or "]", got Token: "{self.currentToken.type}"', self.currentToken)
             self.advance()
 
         if not self.currentToken.match("BLOCK"):
-            raise ParsingError(f'Expected "$", got: "{self.currentToken.type}"', self.currentToken)
+            raise HParsingError(f'Expected "$", got: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         body = self.statements()
 
         if not self.currentToken.match("BLOCK"):
-            raise ParsingError(f'Expected "$", got: "{self.currentToken.type}"', self.currentToken)
+            raise HParsingError(f'Expected "$", got: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         return FunctionDefinitionNode(
@@ -164,38 +164,38 @@ class Parser:
         condition = self.expression()
 
         if not self.currentToken.match("BLOCK"):
-            raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
+            raise HParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         body = self.statements()
 
         if not self.currentToken.match("BLOCK"):
-            raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
+            raise HParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         return WhileNode(condition, body)
 
     def forExpression(self):
         if self.currentToken.type != "IDENTIFIER":
-            raise ParsingError(f'Expected IDENTIFIER, got: "{self.currentToken.type}"', self.currentToken)
+            raise HParsingError(f'Expected IDENTIFIER, got: "{self.currentToken.type}"', self.currentToken)
         variableName = self.currentToken
         self.advance()
 
         if self.currentToken.type != "ASSIGNMENT":
             if self.currentToken.type != "OF":
-                raise ParsingError(f'Expected Token: ":" or ";;", got Token: "{self.currentToken.type}"', self.currentToken)
+                raise HParsingError(f'Expected Token: ":" or ";;", got Token: "{self.currentToken.type}"', self.currentToken)
             self.advance()
             
             iterable = self.expression()
 
             if not self.currentToken.match("BLOCK"):
-                raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
+                raise HParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
             self.advance()
 
             body = self.statements()
 
             if not self.currentToken.match("BLOCK"):
-                raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
+                raise HParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
             self.advance()
 
             return ForEachNode(variableName, iterable, body)
@@ -205,7 +205,7 @@ class Parser:
         startValue = self.expression()
 
         if self.currentToken.type != "ARROW":
-            raise ParsingError(f'Expected Token: "=>", got Token: "{self.currentToken.type}"', self.currentToken)
+            raise HParsingError(f'Expected Token: "=>", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         endValue = self.expression()
@@ -218,13 +218,13 @@ class Parser:
         else: stepValue = IntNode(Token("INT", 1, 0, 0, 0, 0))
 
         if not self.currentToken.match("BLOCK"):
-            raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
+            raise HParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         body = self.statements()
 
         if not self.currentToken.match("BLOCK"):
-            raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
+            raise HParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         return ForNode(variableName, startValue, endValue, stepValue, body)
@@ -233,13 +233,13 @@ class Parser:
         condition = self.expression()
 
         if not self.currentToken.match("SWITCH"):
-            raise ParsingError(f'Expected Token: "--", got Token: "{self.currentToken.type}"', self.currentToken)
+            raise HParsingError(f'Expected Token: "--", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         caseTrue = self.expression()
 
         if not self.currentToken.match("SWITCH"):
-            raise ParsingError(f'Expected Token: "--", got Token: "{self.currentToken.type}"', self.currentToken)
+            raise HParsingError(f'Expected Token: "--", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         caseFalse = self.expression()
@@ -252,7 +252,7 @@ class Parser:
         condition = self.expression()
 
         if not self.currentToken.match("BLOCK"):
-            raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
+            raise HParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         cases.append((condition, self.statements()))
@@ -263,7 +263,7 @@ class Parser:
             condition = self.expression()
             
             if not self.currentToken.match("BLOCK"):
-                raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
+                raise HParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
             self.advance()
 
             cases.append((condition, self.statements()))
@@ -274,7 +274,7 @@ class Parser:
             cases.append((IntNode(Token("INT", 1, 0, 0, 0, 0)), self.statements()))
         
         if not self.currentToken.match("BLOCK"):
-            raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
+            raise HParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         return IfNode(cases)
@@ -314,7 +314,7 @@ class Parser:
                 argNodes.append(self.expression())
 
             if self.currentToken.type != "RIGHT_BRACKET":
-                raise ParsingError(f'Expected "," or "]", got Token: {self.currentToken.type}', self.currentToken)
+                raise HParsingError(f'Expected "," or "]", got Token: {self.currentToken.type}', self.currentToken)
             self.advance()
 
         return argNodes
@@ -356,7 +356,7 @@ class Parser:
 
                 return GetNode(atom, slices)
             
-            else: raise ParsingError(f'Unexpected Token: "{self.currentToken.type}", ">>" expected.', self.currentToken)
+            else: raise HParsingError(f'Unexpected Token: "{self.currentToken.type}", ">>" expected.', self.currentToken)
 
         
         return stack if stack else atom
@@ -400,7 +400,7 @@ class Parser:
                 return expression
 
             else:
-                raise ParsingError (f'Expected Token: ")", got Token: "{self.currentToken.type}"')
+                raise HParsingError (f'Expected Token: ")", got Token: "{self.currentToken.type}"')
 
         elif token.match("LEFT_CURLY"):
             self.advance()
@@ -426,4 +426,4 @@ class Parser:
             self.advance()
             return self.functionExpression()
 
-        raise ParsingError(f'Unexpected Token: "{token.type}"', self.currentToken)
+        raise HParsingError(f'Unexpected Token: "{token.type}"', self.currentToken)
