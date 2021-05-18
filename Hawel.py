@@ -1,7 +1,7 @@
 from _token      import Token
 from lexer       import Lexer
 from nodes       import *
-from _parser     import Parser
+from _parser     import *
 from context     import *
 from classes     import *
 from interpreter import *
@@ -11,7 +11,6 @@ from tree        import tree
 def main():
 
     import sys
-    import json
 
     # Setup Context
     context_main = Context('main')
@@ -31,23 +30,26 @@ def main():
     if len(sys.argv) == 1:
 
         while True:
+            try:
+                code = input("(Hwl) ")
 
-            tokens = Lexer(TOKENS).lex(input("(Hwl)\n  └─"))
-            # print(f"\nToken List: {tokens}")
+                tokens = Lexer(TOKENS).lex(code)
 
-            ast = Parser(tokens).parse()
-            tree(ast, indent="    ")
-            # print(f'\nAST:\n{json.dumps(eval(ast.__repr__()), indent = 2)}')
+                ast = Parser(tokens).parse()
+                tree(ast, indent="")
 
-            result = Interpreter(ast).interpretate(context_main)
-            print(f'\nresult: {result}')
+                result = Interpreter(ast).interpretate(context_main)
+                print(f'\nresult: {result}')
+                
+            except ParsingError as e: e.showError("(Hwl)", code)
         
     else:
-        if sys.argv[1] == "-a" or sys.argv[1] == "--ast":
-            with open(f'{sys.argv[2]}', 'r') as file:
-                print(f"{sys.argv[2]}"); tree(Parser(Lexer(TOKENS).lex(file.read())).parse(), indent = "    ")
-        else:
+        try:
             with open(f'{sys.argv[1]}', 'r') as file:
                 Interpreter(Parser(Lexer(TOKENS).lex(file.read())).parse()).interpretate(context_main)
+        
+        except ParsingError as e:
+            with open(f'{sys.argv[1]}', 'r') as file:
+                e.showError(file.name, file.read())
 
 if __name__ == '__main__': main()

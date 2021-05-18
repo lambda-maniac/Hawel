@@ -7,17 +7,27 @@ class Lexer:
         self.tokens = tokens
 
     def lex(self, string):
-        self.string = string
-        self.cursor = 0
+        self.string  = string
+        self.cursor  = 0
+        self._cursor = 0
+        self.lineno  = 1
 
         tokenList = []
 
         while self.cursor < len(self.string):
 
             tokenFailSafe = 0
+            elderCursor   = 0
+            tokenBegin    = 0
+            tokenEnd      = 0
+            _cursor       = 0
 
             for token, _type in self.tokens.items():
                 match = self.re.findall(token, self.string[self.cursor:])
+
+                if match == ['\n']:
+                    self.lineno += 1
+                    self._cursor = -1
 
                 if match == []: 
                     
@@ -26,10 +36,15 @@ class Lexer:
                     
                     continue
             
-                self.cursor += len(match[0])
+                tokenBegin   = self._cursor
+                
+                self.cursor  += len(match[0])
+                self._cursor += len(match[0])
+
+                tokenEnd     = self._cursor - 1
             
                 if _type == None: continue
-            
-                tokenList.append(Token(_type, match[0]))
+
+                tokenList.append(Token(_type, match[0], tokenBegin, tokenEnd, self.lineno, self.cursor))
 
         return tokenList

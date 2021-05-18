@@ -1,11 +1,42 @@
 from _token import Token
 from nodes  import *
 
+class ParsingError (Exception):
+
+    def __init__(self, message, token):
+        self.message = message
+        self.token   = token
+
+    def showError(self, context, code):
+        # Just Some Coloring
+        Red     = "\x1b[38;2;251;73;52m"
+        Purple  = "\x1b[38;2;211;134;155m"
+        Cyan    = "\x1b[38;2;142;192;124m"
+        Orange  = "\x1b[38;2;254;128;25m"
+        Default = "\x1b[0m"
+
+        print(f'\n[{Cyan}{context}{Default}:{Purple}{self.token.line}{Default}:{Purple}{self.token.begin}{Default}:{Purple}{self.token.end}{Default}] {Red}Error{Default}: {self.message}.\n')
+
+        spacing = ' ' * (self.token.begin)
+        pointTo = '^' * (self.token.end - self.token.begin + 1) 
+        nLength = " " * len(str(self.token.line))
+
+        line = code.split("\n")[self.token.line - 1]
+        line = list(line)
+        line.insert(self.token.begin  , Orange )
+        line.insert(self.token.end + 2, Default)
+        line = ''.join(line)
+
+        print(f' {nLength} | ')
+        print(f' {Purple}{self.token.line}{Default} | {line}')
+        print(f' {nLength} | {Red}{spacing}{pointTo}{Default}')
+
+
 class Parser:
     def __init__(self, tokens):
         self.tokens       = tokens
         self.tokenIndex   = -1
-        self.currentToken = Token("INT", "0")
+        self.currentToken = Token("INT", "0", 0, 0, 0, 0)
 
         self.advance()
 
@@ -71,7 +102,7 @@ class Parser:
                 nodesList.append(self.expression())
 
             if self.currentToken.type != "RIGHT_CURLY":
-                raise SyntaxError(f'Expected "," or "{"}"}", got Token: {self.currentToken.type}')
+                raise ParsingError(f'Expected "," or "{"}"}", got Token: {self.currentToken.type}', self.currentToken)
             self.advance()
         
         return ListNode(nodesList)
@@ -82,12 +113,12 @@ class Parser:
             self.advance()
 
             if not self.currentToken.match("LEFT_BRACKET"):
-                raise SyntaxError(f'Expected Token: "[", got Token: "{self.currentToken.type}"')
+                raise ParsingError(f'Expected Token: "[", got Token: "{self.currentToken.type}"', self.currentToken)
         else:
-            functionName = Token("IDENTIFIER", "Anonymous")
+            functionName = Token("IDENTIFIER", "Anonymous", 0, 0, 0, 0)
 
             if not self.currentToken.match("LEFT_BRACKET"):
-                raise SyntaxError(f'Expected IDENTIFIER or "[", got Token: "{self.currentToken.type}"')
+                raise ParsingError(f'Expected IDENTIFIER or "[", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         argNameTokens = []
@@ -99,28 +130,28 @@ class Parser:
                 self.advance()
 
                 if self.currentToken.type != "IDENTIFIER":
-                    raise SyntaxError(f'Expected IDENTIFIER, got: "{self.currentToken.type}"')
+                    raise ParsingError(f'Expected IDENTIFIER, got: "{self.currentToken.type}"', self.currentToken)
 
                 argNameTokens.append(self.currentToken)
                 self.advance()
 
             if not self.currentToken.match("RIGHT_BRACKET"):
-                raise SyntaxError(f'Expected "," or "]", got Token: "{self.currentToken.type}"')
+                raise ParsingError(f'Expected "," or "]", got Token: "{self.currentToken.type}"', self.currentToken)
             self.advance()
 
         else:
             if not self.currentToken.match("RIGHT_BRACKET"):
-                raise SyntaxError(f'Expected IDENTIFIER or "]", got Token: "{self.currentToken.type}"')
+                raise ParsingError(f'Expected IDENTIFIER or "]", got Token: "{self.currentToken.type}"', self.currentToken)
             self.advance()
 
         if not self.currentToken.match("BLOCK"):
-            raise SyntaxError(f'Expected "$", got: "{self.currentToken.type}"')
+            raise ParsingError(f'Expected "$", got: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         body = self.statements()
 
         if not self.currentToken.match("BLOCK"):
-            raise SyntaxError(f'Expected "$", got: "{self.currentToken.type}"')
+            raise ParsingError(f'Expected "$", got: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         return FunctionDefinitionNode(
@@ -133,38 +164,38 @@ class Parser:
         condition = self.expression()
 
         if not self.currentToken.match("BLOCK"):
-            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+            raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         body = self.statements()
 
         if not self.currentToken.match("BLOCK"):
-            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+            raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         return WhileNode(condition, body)
 
     def forExpression(self):
         if self.currentToken.type != "IDENTIFIER":
-            raise SyntaxError(f'Expected IDENTIFIER, got: "{self.currentToken.type}"')
+            raise ParsingError(f'Expected IDENTIFIER, got: "{self.currentToken.type}"', self.currentToken)
         variableName = self.currentToken
         self.advance()
 
         if self.currentToken.type != "ASSIGNMENT":
             if self.currentToken.type != "OF":
-                raise SyntaxError(f'Expected Token: ":" or ";;", got Token: "{self.currentToken.type}"')
+                raise ParsingError(f'Expected Token: ":" or ";;", got Token: "{self.currentToken.type}"', self.currentToken)
             self.advance()
             
             iterable = self.expression()
 
             if not self.currentToken.match("BLOCK"):
-                raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+                raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
             self.advance()
 
             body = self.statements()
 
             if not self.currentToken.match("BLOCK"):
-                raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+                raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
             self.advance()
 
             return ForEachNode(variableName, iterable, body)
@@ -174,7 +205,7 @@ class Parser:
         startValue = self.expression()
 
         if self.currentToken.type != "ARROW":
-            raise SyntaxError(f'Expected Token: "=>", got Token: "{self.currentToken.type}"')
+            raise ParsingError(f'Expected Token: "=>", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         endValue = self.expression()
@@ -184,16 +215,16 @@ class Parser:
 
             stepValue = self.expression()
 
-        else: stepValue = IntNode(Token("INT", 1))
+        else: stepValue = IntNode(Token("INT", 1, 0, 0, 0, 0))
 
         if not self.currentToken.match("BLOCK"):
-            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+            raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         body = self.statements()
 
         if not self.currentToken.match("BLOCK"):
-            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+            raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         return ForNode(variableName, startValue, endValue, stepValue, body)
@@ -202,13 +233,13 @@ class Parser:
         condition = self.expression()
 
         if not self.currentToken.match("SWITCH"):
-            raise SyntaxError(f'Expected Token: "--", got Token: "{self.currentToken.type}"')
+            raise ParsingError(f'Expected Token: "--", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         caseTrue = self.expression()
 
         if not self.currentToken.match("SWITCH"):
-            raise SyntaxError(f'Expected Token: "--", got Token: "{self.currentToken.type}"')
+            raise ParsingError(f'Expected Token: "--", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         caseFalse = self.expression()
@@ -221,7 +252,7 @@ class Parser:
         condition = self.expression()
 
         if not self.currentToken.match("BLOCK"):
-            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+            raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         cases.append((condition, self.statements()))
@@ -232,7 +263,7 @@ class Parser:
             condition = self.expression()
             
             if not self.currentToken.match("BLOCK"):
-                raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+                raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
             self.advance()
 
             cases.append((condition, self.statements()))
@@ -240,10 +271,10 @@ class Parser:
         if self.currentToken.match("ELSE"):
             self.advance()
 
-            cases.append((IntNode(Token("INT", 1)), self.statements()))
+            cases.append((IntNode(Token("INT", 1, 0, 0, 0, 0)), self.statements()))
         
         if not self.currentToken.match("BLOCK"):
-            raise SyntaxError(f'Expected Token: "$", got Token: "{self.currentToken.type}"')
+            raise ParsingError(f'Expected Token: "$", got Token: "{self.currentToken.type}"', self.currentToken)
         self.advance()
 
         return IfNode(cases)
@@ -283,7 +314,7 @@ class Parser:
                 argNodes.append(self.expression())
 
             if self.currentToken.type != "RIGHT_BRACKET":
-                raise SyntaxError(f'Expected "," or "]", got Token: {self.currentToken.type}')
+                raise ParsingError(f'Expected "," or "]", got Token: {self.currentToken.type}', self.currentToken)
             self.advance()
 
         return argNodes
@@ -325,7 +356,7 @@ class Parser:
 
                 return GetNode(atom, slices)
             
-            else: raise SyntaxError(f'Unexpected Token: "{self.currentToken.type}", ">>" expected.')
+            else: raise ParsingError(f'Unexpected Token: "{self.currentToken.type}", ">>" expected.', self.currentToken)
 
         
         return stack if stack else atom
@@ -369,7 +400,7 @@ class Parser:
                 return expression
 
             else:
-                raise SyntaxError (f'Expected Token: ")", got Token: "{self.currentToken.type}"')
+                raise ParsingError (f'Expected Token: ")", got Token: "{self.currentToken.type}"')
 
         elif token.match("LEFT_CURLY"):
             self.advance()
@@ -395,4 +426,4 @@ class Parser:
             self.advance()
             return self.functionExpression()
 
-        raise SyntaxError(f'Unexpected Token: "{token.type}"')
+        raise ParsingError(f'Unexpected Token: "{token.type}"', self.currentToken)
