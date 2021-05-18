@@ -338,7 +338,7 @@ class Function:
         if len(args) < len(self.argNames):
             raise HRuntimeError(f'Too few arguments given to "{self.name.value}"', where.variable, self.context.contextName)
 
-        self.context = Context(self.name, self.context)
+        self.context = Context(self.name.value, self.context)
 
         for i in range(len(args)):
             argName  = self.argNames[i].value
@@ -358,7 +358,7 @@ class Function:
 class BuiltInPrint:
     
     @staticmethod
-    def execute(args, context):
+    def execute(args, context, _):
         try:
             if args[0].value == "-n": print(*args[1:] , end = ''  )
             else                    : print(''.join([str(arg) for arg in args]), end = "\n")
@@ -373,7 +373,7 @@ class BuiltInPrint:
 class BuiltInInput:
     
     @staticmethod
-    def execute(args, context):
+    def execute(args, context, _):
         return String(input(*args))
 
     def __repr__(self):
@@ -382,7 +382,7 @@ class BuiltInInput:
 class BuiltInInt:
     
     @staticmethod
-    def execute(args, context):
+    def execute(args, context, _):
         return Int(int(args[0].value))
 
     def __repr__(self):
@@ -391,8 +391,19 @@ class BuiltInInt:
 class BuiltInString:
     
     @staticmethod
-    def execute(args, context):
+    def execute(args, context, _):
         return String(str(args[0].value))
+
+    def __repr__(self):
+        return f'{self.__class__}'
+
+class BuiltInClear:
+    
+    @staticmethod
+    def execute(args, context, _):
+        from os import system as cmd
+        cmd("clear")
+        return Int(0)
 
     def __repr__(self):
         return f'{self.__class__}'

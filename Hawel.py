@@ -25,6 +25,7 @@ def main():
         'get'  : BuiltInInput(),
         'int'  : BuiltInInt(),
         'str'  : BuiltInString(),
+        'cls'  : BuiltInClear(),
     }
 
     if len(sys.argv) == 1:
