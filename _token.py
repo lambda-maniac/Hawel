@@ -11,4 +11,7 @@ class Token:
         return self.type == _type
 
     def tree(self):
-        return [f'{self.type}: "{self.value}"']
+        return [f'{self.__repr__()}']
+
+    def __repr__(self):
+        return f'({self.type}, {self.value})'

@@ -1,8 +1,7 @@
 TOKENS = \
 {
     r"^[\s+\n+]": None,
-
-    # Verbose
+    r'^\[\:.*\:\]': None,
     
     r"^return": "RETURN",
     r"^continue": "CONTINUE",
@@ -30,9 +29,9 @@ TOKENS = \
     r"^and": "AND",
     r"^or": "OR",
 
-    r"^endl": "NEXT",
+    r"^(endl|thenl)": "NEXT",
 
-    r"^while": "WHILE",
+    r"^(while|until)": "WHILE",
 
     r"^(function|def)": "FUNCTION",
     
@@ -40,8 +39,6 @@ TOKENS = \
     r"^length": "LENGTH",
 
     r"^(as|is)": "ASSIGNMENT",
-
-    # Vanilla
 
     r"^\<\<\=": "RETURN",
     r"^\>\>\>": "CONTINUE",
