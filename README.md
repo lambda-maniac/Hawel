@@ -29,8 +29,15 @@ Yes, the pipe symbol ends a statement... Why do you even care?
 Here we have some examples on how to use the language:
 
 ## Comments:
-```cs
-[: Wow, Comment! :]
+### multilines:
+```lua
+[[ Wow, Comment! ]]
+</ Wow, Comment! />
+```
+### single lines:
+```hs
+::= Wow, Comment!
+</> Wow, Comment!
 ```
 
 ## Variables and types:
@@ -96,55 +103,55 @@ list <APPEND> value <ENDL>
 Symbolic:
 ```cs
 list: {1, 2, 3, 4, 5} |
-    [: this could be a String too. :]
+    [[ this could be a String too. ]]
 
 <$list|
     [: out: 1 :]
 
 <*list|
-    [: out: {2, 3, 4, 5} :]
+    [[ out: {2, 3, 4, 5} ]]
 
 0 <$> list|
-    [: out: {0, 1, 2, 3, 4, 5} :]
+    [[ out: {0, 1, 2, 3, 4, 5} ]]
 
 list <*> 6|
-    [: list is now {1, 2, 3, 4, 5, 6} :]
+    [[ list is now {1, 2, 3, 4, 5, 6} ]]
 
 #list|
-    [: out: 5 :]
+    [[ out: 5 ]]
 
 list<<0>> : 0 |
-    [: list is now {0, 2, 3, 4, 5} :]
+    [[ list is now {0, 2, 3, 4, 5} ]]
 
 list<<2\4>> |
-    [: out: {2, 3} :]
+    [[ out: {2, 3} ]]
 
 ```
 Verbose:
 ```vb
 list as {1, 2, 3, 4, 5};
-    [: this could be a String too. :]
+    [[ this could be a String too. ]]
 
 head list;
-    [: out: 1 :]
+    [[ out: 1 ]]
 
 tail list;
-    [: out: {2, 3, 4, 5} :]
+    [[ out: {2, 3, 4, 5} ]]
 
 0 prepend list;
-    [: out: {0, 1, 2, 3, 4, 5} :] 
+    [[ out: {0, 1, 2, 3, 4, 5} ]]
 
 list append 6;
-    [: list is now {1, 2, 3, 4, 5, 6} :]
+    [[ list is now {1, 2, 3, 4, 5, 6} ]]
 
 length list;
-    [: out: 5 :]
+    [[ out: 5 ]]
 
 list<<0>> is 0;
-    [: list is now {0, 2, 3, 4, 5} :]
+    [[ list is now {0, 2, 3, 4, 5} ]]
 
 list<<2\4>>;
-    [: out: {2, 3} :]
+    [[ out: {2, 3} ]]
 
 ```
 ### Note:

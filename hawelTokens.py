@@ -1,7 +1,11 @@
 TOKENS = \
 {
     r"^[\s+\n+]": None,
-    r'^\[\:.*\:\]': None,
+
+    r'^\:\:\=.*': None,
+    r"^(?s)\[\[.*?\]\]": None,
+    r'^\<\/\>.*': None,
+    r"^(?s)\<\/.*?\/\>": None,
     
     r"^return": "RETURN",
     r"^continue": "CONTINUE",
