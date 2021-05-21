@@ -28,6 +28,11 @@ Yes, the pipe symbol ends a statement... Why do you even care?
 ## Commands and Basics
 Here we have some examples on how to use the language:
 
+## Comments:
+```cs
+[: Wow, Comment! :]
+```
+
 ## Variables and types:
 * ```<ASSIGNMENT>```'s can be substituted by either ```:``` or (```=```, ```as```, ```is```).
 ```
@@ -91,55 +96,55 @@ list <APPEND> value <ENDL>
 Symbolic:
 ```cs
 list: {1, 2, 3, 4, 5} |
-    this could be a String too.
+    [: this could be a String too. :]
 
 <$list|
-    out: 1
+    [: out: 1 :]
 
 <*list|
-    out: {2, 3, 4, 5}
+    [: out: {2, 3, 4, 5} :]
 
 0 <$> list|
-    out: {0, 1, 2, 3, 4, 5}
+    [: out: {0, 1, 2, 3, 4, 5} :]
 
 list <*> 6|
-    list is now {1, 2, 3, 4, 5, 6}
+    [: list is now {1, 2, 3, 4, 5, 6} :]
 
 #list|
-    out: 5
+    [: out: 5 :]
 
 list<<0>> : 0 |
-    list is now {0, 2, 3, 4, 5}
+    [: list is now {0, 2, 3, 4, 5} :]
 
 list<<2\4>> |
-    out: {2, 3}
+    [: out: {2, 3} :]
 
 ```
 Verbose:
 ```vb
 list as {1, 2, 3, 4, 5};
-    this could be a String too.
+    [: this could be a String too. :]
 
 head list;
-    out: 1
+    [: out: 1 :]
 
 tail list;
-    out: {2, 3, 4, 5}
+    [: out: {2, 3, 4, 5} :]
 
 0 prepend list;
-    out: {0, 1, 2, 3, 4, 5}
+    [: out: {0, 1, 2, 3, 4, 5} :] 
 
 list append 6;
-    list is now {1, 2, 3, 4, 5, 6}
+    [: list is now {1, 2, 3, 4, 5, 6} :]
 
 length list;
-    out: 5
+    [: out: 5 :]
 
 list<<0>> is 0;
-    list is now {0, 2, 3, 4, 5}
+    [: list is now {0, 2, 3, 4, 5} :]
 
 list<<2\4>>;
-    out: {2, 3}
+    [: out: {2, 3} :]
 
 ```
 ### Note:
@@ -298,6 +303,45 @@ function add [a, b] do
     return a + b
 end;
 ```
+
+## Just one more note about the syntax, that you may have not noticed yet:
+
+Hawel's parser will only require a ```<ENDL>``` token **if** there is a new statement after it. So basically, the syntax looks more like "```;code```" instead of "```code;```". That's why you can use "```;```" and "```|```" as a ```<ENDL>``` token, to make things a little more "Readable" and "Beautiful", use this syntax convention:
+
+## Block free:
+```vb
+statement1
+| statement2
+| statement3
+...
+```
+
+## Blocks:
+```vb
+def f [] 
+    $ statement1
+    | statement2
+    | statement3
+    | if condition
+        $ statement1
+        | statement2
+        | statement3
+    $
+    | statement4
+    | statement5
+    | for e of l
+        $ statement1
+        | statement2
+        | statement3
+         ...
+    $ statement6
+    | statement7
+     ...
+$
+| statement2
+ ...
+```
+
 # That's all of the basics! Now you can torture yourself by trying the language!
 ## Here are some more complex examples:
 ### Factorial function - Hawel program:
@@ -310,7 +354,6 @@ end;
 $
 | n: int [get ["Enter a number: "]]
 | echo ["Factorial of", n, "is", factorial[n]]
-
 ```
 ### Factorial function (verbose syntax) - Hawel program:
 ```vb
@@ -322,7 +365,6 @@ function factorial[n] do
 end;
 n: int [get ["Enter a number: "]];
 echo ["Factorial of", n, "is", factorial[n]]
-
 ```
 ### Map function (loop) - Hawel program:
 ```cs
@@ -390,6 +432,7 @@ function main [] do
     echo [map [square, list]]
 end; main[]
 ```
+
 ### Map function (recursive-currying) - Hawel program:
 ```cs
 'program': "Map Example (recursive-currying) .hw"
@@ -407,6 +450,7 @@ $)
 $
 | main[]
 ```
+
 ### Map function (recursive-currying, verbose syntax) - Hawel program:
 ```vb
 'program': "Map Example (recursive-currying, verbose syntax) .hw";
@@ -425,5 +469,4 @@ function main[] do
     echo [map [squareN][numbers]]
 
 end; main[]
-
 ```
