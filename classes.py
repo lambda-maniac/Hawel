@@ -34,27 +34,27 @@ class Int:
 
     def GREATER_THAN(self, other):
         if isinstance(other, Int):
-            return Int(self.value > other.value)
+            return Int(int(self.value > other.value))
 
-    def GREATER_THAN_OR_EQUAL(self, other):
+    def GREATER_THAN_EQUAL(self, other):
         if isinstance(other, Int):
-            return Int(self.value >= other.value)
+            return Int(int(self.value >= other.value))
 
     def LESS_THAN(self, other):
         if isinstance(other, Int):
-            return Int(self.value < other.value)
+            return Int(int(self.value < other.value))
 
-    def LESS_THAN_OR_EQUAL(self, other):
+    def LESS_THAN_EQUAL(self, other):
         if isinstance(other, Int):
-            return Int(self.value <= other.value)
+            return Int(int(self.value <= other.value))
 
     def EQUAL(self, other):
         if isinstance(other, Int):
-            return Int(self.value == other.value)
+            return Int(int(self.value == other.value))
 
     def NOT_EQUAL(self, other):
         if isinstance(other, Int):
-            return Int(self.value != other.value)
+            return Int(int(self.value != other.value))
 
     def AND(self, other):
         if isinstance(other, Int):
@@ -88,11 +88,11 @@ class String:
 
     def EQUAL(self, other):
         if isinstance(other, String):
-            return Int(self.value == other.value)
+            return Int(int(self.value == other.value))
 
     def NOT_EQUAL(self, other):
         if isinstance(other, String):
-            return Int(self.value != other.value)
+            return Int(int(self.value != other.value))
 
     def NOT(self):
         return String(self.value[::-1])
@@ -152,11 +152,11 @@ class List:
     
     def EQUAL(self, other):
         if isinstance(other, List):
-            return Int(self.elements == other.elements)
+            return Int(int(self.elements == other.elements))
 
     def NOT_EQUAL(self, other):
         if isinstance(other, List):
-            return Int(self.elements != other.elements)
+            return Int(int(self.elements != other.elements))
 
     def NOT(self):
         return List(self.elements[::-1])

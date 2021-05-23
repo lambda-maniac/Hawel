@@ -35,9 +35,9 @@ def shell():
         'cls'  : BuiltInClear(),
     }
 
-    showTree   = False
+    showTree   = True
     showTokens = False
-    showResult = False
+    showResult = True
 
     while True:
         try:

@@ -66,8 +66,8 @@ TOKENS = \
     r"^\;\;": "OF",
     r"^\.\.": "STEP",
 
-    r"^\>\=": "GREATER_THAN_OR_EQUAL",
-    r"^\<\=": "LESS_THAN_OR_EQUAL",
+    r"^\>\=": "GREATER_THAN_EQUAL",
+    r"^\<\=": "LESS_THAN_EQUAL",
 
     r"^\<\<": "LEFT_SLICE",
     r"^\>\>": "RIGHT_SLICE",

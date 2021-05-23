@@ -289,7 +289,7 @@ class Parser:
 
             return UnaryOpNode(operation, self.comparisonExpression())
 
-        return self.binOperation(self.arithmeticExpression, "GREATER_THAN|LESS_THAN|GREATER_THAN_OR_EQUAL|LESS_THAN_OR_EQUAL|EQUAL|NOT_EQUAL", self.arithmeticExpression)
+        return self.binOperation(self.arithmeticExpression, "GREATER_THAN|LESS_THAN|GREATER_THAN_EQUAL|LESS_THAN_EQUAL|EQUAL|NOT_EQUAL", self.arithmeticExpression)
 
     def expression(self):
         return self.binOperation(self.comparisonExpression, "AND|OR", self.comparisonExpression)
