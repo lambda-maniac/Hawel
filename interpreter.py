@@ -307,6 +307,9 @@ class Interpreter:
 
         args = [response.register(self.visit(argNode, context)) for argNode in node.argNodes]
 
+        if not hasattr(valueToCall, "execute"):
+            raise HRuntimeError(f'Object "{node.nodeToCall.token}" is not a function', node.nodeToCall.token, context.contextName)
+
         return response.proceed(
             valueToCall.execute(args, context, node.nodeToCall)
         )

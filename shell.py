@@ -68,7 +68,7 @@ def shell():
 
             result = Interpreter(ast).interpretate(context_main)
             if showResult:
-                print(''.join([n.__repr__() for n in result.value.elements]))
+                print(f' out : {"".join([n.__repr__() for n in result.value.elements])}')
             
         except HParsingError as e: e.showError("Hwl", code)
         except HRuntimeError as e: e.showError("Hwl", code)
