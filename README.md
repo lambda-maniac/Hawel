@@ -25,8 +25,7 @@ $|
 ```
 Yes, the pipe symbol ends a statement... Why do you even care?
 
-## Commands and Basics
-Here we have some examples on how to use the language:
+# Commands and Basics
 
 ## Comments:
 ### multilines:
@@ -106,7 +105,7 @@ list: {1, 2, 3, 4, 5} |
     [[ this could be a String too. ]]
 
 <$list|
-    [: out: 1 :]
+    [[ out: 1 ]]
 
 <*list|
     [[ out: {2, 3, 4, 5} ]]
@@ -376,7 +375,7 @@ echo ["Factorial of", n, "is", factorial[n]]
 ### Map function (loop) - Hawel program:
 ```cs
 'prgram': "Map Example (loop) .hw"
-| @map [f; list]
+| @map [f, list]
     $ ! n: 0 => #list
         $ list<<n>> : f [list<<n>>]
     $
@@ -385,13 +384,13 @@ $
 | @main[]
     $ list: {1, 2, 3, 4, 5}
     | square: (@[n]$ <<= n * n $)
-    | echo [map [square; list]]
+    | echo [map [square, list]]
 $
 | main[]
 ```
 ### Map function (loop, verbose syntax) - Hawel program:
 ```vb
-'prgram': "Map Example (loop, verbose syntax) .hw"
+'prgram': "Map Example (loop, verbose syntax) .hw";
 function map [f, list] do
     for n as null to length list do
         list<<n>> is f [list<<n>>]
