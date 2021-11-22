@@ -158,8 +158,11 @@ else
 end
 ```
 [Here you can find all the definitions for the `if` token](#if)
+
 [Here you can find all the definitions for the `elif` clause token](#elif)
+
 [Here you can find all the definitions for the `else` clause token](#else)
+
 ## Tokens
 Collection of all tokens defined in Hawel.
 
