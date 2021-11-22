@@ -7,6 +7,7 @@ Contents of this document:
         - [Hello World!](#hello-world)
         - [Declaring variables](#declaring-variables)
         - [Comments](#comments)
+        - [Getting input](#getting-input)
     - [Tokens](#tokens)
         - [Next](#next)
         - [Assignment](#assignment)
@@ -17,6 +18,7 @@ This part is the introduction to the Hawel language, it covers from a simple "He
 - [Hello World!](#hello-world)
 - [Declaring variables](#declaring-variables)
 - [Comments](#comments)
+- [Getting input](#getting-input)
 
 ## Hello World!
 Here's a simple "Hello World!" example in Hawel:
@@ -61,6 +63,17 @@ This is how we can comment certain parts of our code in Hawel:
 [[ Multiline comment ]]
 ```
 The code above is completely ignored by the interpreter. You can see the definition for the comment token here: [comment](#comment)
+
+## Getting input
+In Hawel, the way of getting user input from the console, is by calling the function `get`. It always returns the input as a string, and also accepts a string as a prompt.
+See now a simple greeting program:
+```
+| name: get ["Enter your name: "]
+| echo ["Hello, ", name, "!"]
+```
+**Explanation:**
+
+The code above simply assigns the return value of the `get` function, and then echoes `"Hello, "`, the variable `name`, and finally an exclamation point (`"!"`).
 
 ## Tokens
 Collection of all tokens defined in Hawel.
