@@ -8,6 +8,7 @@ Contents of this document:
         - [Declaring variables](#declaring-variables)
         - [Comments](#comments)
         - [Getting input](#getting-input)
+        - [Arithmetic](#arithmetic)
     - [Tokens](#tokens)
         - [Next](#next)
         - [Assignment](#assignment)
@@ -19,6 +20,7 @@ This part is the introduction to the Hawel language, it covers from a simple "He
 - [Declaring variables](#declaring-variables)
 - [Comments](#comments)
 - [Getting input](#getting-input)
+- [Arithmetic](#arithmetic)
 
 ## Hello World!
 Here's a simple "Hello World!" example in Hawel:
@@ -65,7 +67,8 @@ This is how we can comment certain parts of our code in Hawel:
 The code above is completely ignored by the interpreter. You can see the definition for the comment token here: [comment](#comment)
 
 ## Getting input
-In Hawel, the way of getting user input from the console, is by calling the function `get`. It always returns the input as a string, and also accepts a string as a prompt.
+In Hawel, the way of getting user input from the console, is by calling the function `get`. It always returns the input as a string, and also accepts a string as a prompt. 
+
 See now a simple greeting program:
 ```
 | name: get ["Enter your name: "]
@@ -74,6 +77,30 @@ See now a simple greeting program:
 **Explanation:**
 
 The code above simply assigns the return value of the `get` function, and then echoes `"Hello, "`, the variable `name`, and finally an exclamation point (`"!"`).
+
+## Arithmetic
+All four basic arithmetic operators are present in Hawel: `+`,`-`,`*` and`/`.  (We also have `^`, for exponentiation)
+
+See now a simple program performing all of those operations on two numbers:
+```
+| a = int [get ["Enter a value for 'a': "]] </> Note that here we are using the `int` function,
+| b = int [get ["Enter a value for 'b': "]] </> to convert the string returned by `get` to a number.
+| add = a + b
+| sub = a - b
+| mul = a * b
+| div = a / b
+| pow = a ^ b
+| echo [a, " + ", b, " = ", add]
+| echo [a, " - ", b, " = ", sub]
+| echo [a, " * ", b, " = ", mul]
+| echo [a, " / ", b, " = ", div]
+| echo [a, " ^ ", b, " = ", pow]
+```
+**Explanation:**
+
+We start by assigning two numbers (`a` and `b`) the input of the user, but, before that, we pass the return of the `get` function, to another function called `int`, which will convert the string returned to a int, so that we can perform arithmetic operations on them.
+
+After that, we just assign some variables the value of each operation, to then echo each one of them to the console.
 
 ## Tokens
 Collection of all tokens defined in Hawel.
