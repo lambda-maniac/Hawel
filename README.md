@@ -5,30 +5,50 @@ Contents of this document:
 - [Hawel Esoteric Language](#hawel-esoteric-language)
     - [Introduction](#introduction)
         - [Hello World!](#hello-world)
+        - [Declaring variables](#declaring-variables)
     - [Tokens](#tokens)
         - [Next](#next)
+        - [Assignment](#assignment)
 
 ## Introduction
 This part is the introduction to the Hawel language, it covers from a simple "Hello World!", to things such as variables, types and arithmetic.
-### Hello World!
+
+#### Hello World!
 Here's a simple "Hello World!" example in Hawel:
 ```
 | echo ["Hello World!"]
 ```
 Breaking apart the code above, we have 5 tokens in total: 
-- `|             : <NEXT>`
-- `echo          : <IDENTIFIER>`
-- `[             : <OPENING_BRACKET>`
+- `| : <NEXT>`
+- `echo : <IDENTIFIER>`
+- `[ : <OPENING_BRACKET>`
 - `"Hello World! : <STRING>` 
-- `]             : <CLOSING_BRACKET>`
+- `] : <CLOSING_BRACKET>`
 
 **Explanation:**
 First of all, before starting to write an expression in Hawel, you need a `<NEXT>` token, which it's variations can be found here: [next](#next). After that, we see an identifier called `echo`,  which is our 'standard output' function, then we use `[]` to call that function, and pass `"Hello World!"` inside the brackets as it's argument.
 
+#### Declaring variables
+This is how we can declare variables in Hawel:
+```
+| name: "John Doe"
+| age = 18
+| job as "Developer"
+| salary is null
+```
+Breaking apart the first line of the code above, we have 4 tokens in total:
+- `| : <NEXT>`
+- `name : <IDENTIFIER>`
+- `':' : <ASSIGNMENT>` (quotes only for more readability)
+- `"John Doe" : <STRING>`
+
+**Explanation:**
+As we can see, we have our `<NEXT>` token to indicate a new expression, after that, we have an identifier called `name`, which will be the name of our variable. That name is then proceeded by an `<ASSIGNMENT>` token (in this case, a colon ':', you can find all the definitions here: [assignment](#assignment)), and finally, by the value we want it to be assigned (string `"John Doe"`).
+
 ## Tokens
 Collection of all tokens defined in Hawel.
 
-###### Defined at `hawelTokens.py`
+###### Defined at `hawelTokens.py`:
 ```python
 {
     r"^[\s+\n+]": None,
@@ -148,3 +168,9 @@ Collection of all tokens defined in Hawel.
 - `|`
 - `endl`
 - `thenl`
+
+#### Assignment
+- `:`
+- `=`
+- `as`
+- `is`
