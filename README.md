@@ -1,6 +1,7 @@
 # Hawel Esoteric language
 This is a basic language I made for **study purposes**. It has almost everything a normal programming language does. In Hawel, we have two types of syntaxes, one which is purely symbolic, and one more verbose. You can use any of them, or even both at the same time. (This document will show you both of them).
 
+---
 Contents of this document:
 - [Hawel Esoteric Language](#hawel-esoteric-language)
     - [Introduction](#introduction)
@@ -9,6 +10,8 @@ Contents of this document:
         - [Comments](#comments)
         - [Getting input](#getting-input)
         - [Arithmetic](#arithmetic)
+    - [Control flow, booleans and boolean operators](control-flow-booleans-and-boolean-operators)
+        - [If statement](#if-statement)
     - [Tokens](#tokens)
         - [Next](#next)
         - [Assignment](#assignment)
@@ -102,9 +105,97 @@ We start by assigning two numbers (`a` and `b`) the input of the user, but, befo
 
 After that, we just assign some variables the value of each operation, to then echo each one of them to the console.
 
+###### **This marks the end of the [Introduction](#introduction) part.**
+
+# Control flow, booleans and boolean operators
+Here we are going to learn the control flow commands, such as `if` statements and `case` statements. Not only that, but boolean operatos, like `==` (equals), `~` (not), `~=` (not equals), `&&` (and), `||` (or) ,  `>` (greater than), `<` (less than), `>=` (greater or equal) and `<=` (less or equal).
+
+- [If statement](#if-statement)
+
+## If statement
+This is how we state an if expression:
+```
+| if <condition> then
+    | code...
+end
+```
+The `<condition>` part from the code above represents any expression that could evaluate to a boolean (`1` or `0`, also their variable equivalents: `true` or `false`).
+
+Here's a simple program to only greet a specific name:
+```
+| name: get ["Enter your name: "]
+| if name == "John Doe" then
+    | echo ["welcome!"]
+end
+```
+Again, but this time using the `else` clause:
+```
+| name: get ["Enter your name: "]
+| if name == "John Doe" then
+    | echo ["welcome!"]
+else
+    | echo ["Unknown user!"]
+end
+```
+Now, with the `elif` clause:
+```
+| name: get ["Enter your name: "]
+| if name == "John Doe" then
+    | echo ["welcome!"]
+elif name == "Jane Doe" then
+    | echo ["welcome!"]
+else
+    | echo ["Unknown user!"]
+end
+```
+Same of the above, but simplifying the `elif` with an `||`:
+```
+| name: get ["Enter your name: "]
+| if name == "John Doe" || name == "John Doe" then
+    | echo ["welcome!"]
+else
+    | echo ["Unknown user!"]
+end
+```
+[Here you can find all the definitions for the `if` token](#if)
+[Here you can find all the definitions for the `elif` clause token](#elif)
+[Here you can find all the definitions for the `else` clause token](#else)
 ## Tokens
 Collection of all tokens defined in Hawel.
 
+##### Comment
+- `::=`
+- `</>`
+- `[[ ]]` (Multiline)
+- `</ />` (Multiline)
+
+##### Next
+- `;`
+- `|`
+- `endl`
+- `thenl`
+
+#### Assignment
+- `:`
+- `=`
+- `as`
+- `is`
+
+#### If
+- `?..`
+- `if`
+
+#### Elif
+- `.?.`
+- `elif`
+
+#### Else
+- `..?`
+- `else`
+
+---
+
+#### Raw
 ###### Defined at `hawelTokens.py`:
 ```python
 {
@@ -220,20 +311,3 @@ Collection of all tokens defined in Hawel.
     r"^\)": "RIGHT_PARENTHESIS",
 }
 ```
-##### Comment
-- `::=`
-- `</>`
-- `[[ ]]` (Multiline)
-- `</ />` (Multiline)
-
-##### Next
-- `;`
-- `|`
-- `endl`
-- `thenl`
-
-#### Assignment
-- `:`
-- `=`
-- `as`
-- `is`
