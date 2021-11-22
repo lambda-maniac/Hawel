@@ -13,7 +13,7 @@ Contents of this document:
         - [Comment](#comment)
 
 # Introduction
-This part is the introduction to the Hawel language, it covers from a simple "Hello World!", to things such as variables, types and arithmetic.
+This part is the introduction to the Hawel language, it covers from a simple "Hello World!", to things such as variables, types, getting input and arithmetic.
 - [Hello World!](#hello-world)
 - [Declaring variables](#declaring-variables)
 - [Comments](#comments)
@@ -31,6 +31,7 @@ Breaking apart the code above, we have 5 tokens in total:
 - `] : <CLOSING_BRACKET>`
 
 **Explanation:**
+
 First of all, before starting to write an expression in Hawel, you need a `<NEXT>` token, which it's variations can be found here: [next](#next). After that, we see an identifier called `echo`,  which is our 'standard output' function, then we use `[]` to call that function, and pass `"Hello World!"` inside the brackets as it's argument.
 
 ## Declaring variables
@@ -48,6 +49,7 @@ Breaking apart the first line of the code above, we have 4 tokens in total:
 - `"John Doe" : <STRING>`
 
 **Explanation:**
+
 As we can see, we have our `<NEXT>` token to indicate a new expression, after that, we have an identifier called `name`, which will be the name of our variable. That name is then proceeded by an `<ASSIGNMENT>` token (in this case, a colon ':', you can find all the definitions here: [assignment](#assignment)), and finally, by the value we want it to be assigned (string `"John Doe"`).
 
 ## Comments
@@ -181,8 +183,8 @@ Collection of all tokens defined in Hawel.
 ##### Comment
 - `::=`
 - `</>`
-- `[[ ]]`
-- `</ />`
+- `[[ ]]` (Multiline)
+- `</ />` (Multiline)
 
 ##### Next
 - `;`
