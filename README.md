@@ -18,7 +18,7 @@ Breaking the code above apart, we have 5 tokens in total:
 - `]             : <CLOSING_BRACKET>`
 
 #### Explanation
-First of all, before starting to write an expression in Hawel, you need a `<NEXT>` token, which it's variations can be found here: [tokens](###next)
+First of all, before starting to write an expression in Hawel, you need a `<NEXT>` token, which it's variations can be found here: [tokens](#next)
 
 ## Tokens
 Collection of all tokens defined in Hawel.
