@@ -10,7 +10,7 @@ Contents of this document:
         - [Comments](#comments)
         - [Getting input](#getting-input)
         - [Arithmetic](#arithmetic)
-    - [Control flow, booleans and boolean operators](control-flow-booleans-and-boolean-operators)
+    - [Control flow, booleans and boolean operators](#control-flow-booleans-and-boolean-operators)
         - [If statement](#if-statement)
     - [Tokens](#tokens)
         - [Next](#next)
