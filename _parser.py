@@ -52,9 +52,9 @@ class Parser:
     def statements(self):
         statements = []
 
-        statements.append(self.statement())
         while self.currentToken.match("NEXT"):
             self.advance()
+
             statements.append(self.statement())
 
         return ListNode(statements)
