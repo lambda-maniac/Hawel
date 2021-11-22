@@ -23,7 +23,12 @@ Contents of this document:
         - [Loops control flow](#loops-control-flow)
             - [Break](#break-command)
             - [Continue](#continue-command)
+    - [Functions](#functions)
+        - [Definitions](#definitions)
+        - [Simple examples](#simple-examples)
+        - [True Haweler example](#true-haweler-example)
     - [Tokens](#tokens)
+        - [Block](#block)
         - [Next](#next)
         - [Assignment](#assignment)
         - [Comment](#comment)
@@ -31,7 +36,7 @@ Contents of this document:
         - [Elif](#elif)
         - [Else](#else)
         - [Case](#case)
-        - [Select](#select)
+        - [Switch](#switch)
         - [For](#for)
         - [To](#to)
         - [Of](#of)
@@ -39,6 +44,8 @@ Contents of this document:
         - [While](#while)
         - [Break](#break)
         - [Continue](#continue)
+        - [Function](#function)
+        - [Return](#return)
 
 # Introduction
 This part is the introduction to the Hawel language, it covers from a simple "Hello World!", to things such as variables, types, getting input and arithmetic.
@@ -216,7 +223,7 @@ Here's a simple use of the case statement:
 
 The variable `whatsUp` is going to be assigned `"Math works!"` case the condition `1 ~= 0` is indeed true, otherwise it is assigned `"Something seems wrong..."`. Then it's value is echoed in the second line.
 
-Here you can find the definitions for the [case](#case) token, and the [select, otherwise](#select) token.
+Here you can find the definitions for the [case](#case) token, and the [switch](#switch) token.
 
 ###### **This marks the end of [Control flow, booleans and boolean operators](#control-flow-booleans-and-boolean-operators) part.**
 
@@ -362,10 +369,79 @@ Here you can find the definitions for the [continue](#continue) token.
 
 ###### **This marks the end of the [Loops](#loops) part.**
 
+# Functions
+This section will teach us about functions and how to define them.
+
+- [Definitions](#definitions)
+- [Simple examples](#simple-examples)
+- [True Haweler example](#true-haweler-example)
+
+## Definitions
+The standard definition of a function is as it follows:
+```
+| function <name> [<arguments>] do
+    | code...
+end
+```
+The `<name>` part should be any identifier, to take the role as the name of the function. Inside the brackets, you can define either zero or more arguments, all being identifiers too, to be defined inside the function in it's context, when it is called.
+
+Now, you could also define anonymous functions by just omitting it's `<name>`, but writting the world `function` when not giving a name is just painfull, so, use the symbolic version of the token:
+```
+| @[<arguments>]$ | <<= expression... $
+```
+Here you can find the definitions for both the [function](#function) token, and the [return](#return) token.
+
+## Simple examples
+Function to greet someone:
+```
+| function greet [name] do
+    | echo ["Hello, ", name, "!"]
+end
+```
+Function to calculate the square of a number:
+```
+| function square [n] do
+    | return n * n
+end
+```
+Function to calculate the factorial of a number:
+```
+| function factorial [n] do
+    | n' = 1
+    | for i = 1 to n + 1 do
+        | n' = n' * i
+    done
+    | return n'
+end
+```
+
+## True haweler example
+```
+| @factorial [n] ::= factorial function
+    $
+    | <<= :: n == 1
+          -- n
+          -- n * factorial [n - 1]
+$ 
+| @map [f] ::= map function
+    $
+    | <<= (@[list] ::= inner function, so we can curry
+        $
+        | <<= :: {} == list
+              -- {}
+              -- f [<$list] <$> map [f] [<*list] ::= Haskell's "f x : map f xs"
+    $)
+$
+| echo [
+    map [factorial] [{1, 2, 3, 4, 5}] ::= Curry call to (map factorial) list
+]
+```
+###### **This marks the end of the [Functions](#functions) part.**
+
 ---
 
 ## Tokens
-Collection of all tokens defined in Hawel.
+Collection of all tokens defined in Hawel. (Not all, yet)
 
 ##### Block
 - `$`
@@ -408,7 +484,7 @@ Collection of all tokens defined in Hawel.
 - `::`
 - `case`
 
-#### Select
+#### Switch
 - `--`
 - `select`
 - `otherwise`
@@ -440,6 +516,15 @@ Collection of all tokens defined in Hawel.
 #### Continue
 - `>>>`
 - `continue`
+
+#### Function
+- `@`
+- `def`
+- `function`
+
+#### Return
+- `<<=`
+- `return`
 
 ---
 
