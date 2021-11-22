@@ -12,6 +12,9 @@ Contents of this document:
         - [Arithmetic](#arithmetic)
     - [Control flow, booleans and boolean operators](#control-flow-booleans-and-boolean-operators)
         - [If statement](#if-statement)
+            - [if-clause](#if-clause)
+            - [else-clause](#else-clause)
+            - [elif-clause](#elif-clause)
         - [Case statement](#case-statement)
     - [Loops](#loops)
         - [For loop](#for-loop)
@@ -140,6 +143,9 @@ Here we are going to learn the control flow commands, such as `if` statements an
 Contents:
 
 - [If statement](#if-statement)
+    - [if-clause](#if-clause)
+    - [else-clause](#else-clause)
+    - [elif-clause](#elif-clause)
 - [Case statement](#case-statement)
 
 ## If statement
@@ -151,6 +157,7 @@ end
 ```
 The `<condition>` part from the code above represents any expression that could evaluate to a boolean (`1` or `0`, also their variable equivalents: `true` or `false`).
 
+##### If-clause
 Here's a simple program to only greet a specific name:
 ```
 | name: get ["Enter your name: "]
@@ -158,6 +165,7 @@ Here's a simple program to only greet a specific name:
     | echo ["welcome!"]
 end
 ```
+##### Else-clause
 Again, but this time using the `else` clause:
 ```
 | name: get ["Enter your name: "]
@@ -167,6 +175,7 @@ else
     | echo ["Unknown user!"]
 end
 ```
+##### Elif-clause
 Now, with the `elif` clause:
 ```
 | name: get ["Enter your name: "]
@@ -299,7 +308,7 @@ Here you can find the definitions for the [for](#for) token and [of](#of) token.
 ## Loop control flow
 This section will teach you how to use the flow control commands `continue` and `break` inside loops.
 
-##### Break command
+#### Break command
 The break command is used inside loops to stop their looping proccess and jump straight to the end of it's definition.
 
 Here's an example on how to stop the execution of the loop when it reachs the value 5:
@@ -323,7 +332,7 @@ Reason is; when `n = 5`, the `if` is executed and the break is effectuated, endi
 
 Here you can find the definitions for the [break](#break) token.
 
-##### Continue command
+#### Continue command
 The continue command is used inside loops to stop their current iteration, and jump back to the definition of the loop, to check for it's conditions.
 
 Here's an example on how to skip only the fifth iterarion of a loop:
@@ -347,7 +356,7 @@ The code above will only output:
 >9
 >10
 
-Reason is; when `n = 5`, the `if` is executed and the continue is effectuated, ending the loop current iteration and jumping back to the definition.
+Reason is; when `n = 5`, the `if` is executed and the continue is effectuated, ending the loop's current iteration and jumping back to the definition.
 
 Here you can find the definitions for the [continue](#continue) token.
 
