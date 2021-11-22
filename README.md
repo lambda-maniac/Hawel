@@ -12,10 +12,16 @@ Contents of this document:
         - [Arithmetic](#arithmetic)
     - [Control flow, booleans and boolean operators](#control-flow-booleans-and-boolean-operators)
         - [If statement](#if-statement)
+        - [case-statement](#case-statement)
     - [Tokens](#tokens)
         - [Next](#next)
         - [Assignment](#assignment)
         - [Comment](#comment)
+        - [If](#if)
+        - [Elif](#elif)
+        - [Else](#else)
+        - [Case](#case)
+        - [Select](#select)
 
 # Introduction
 This part is the introduction to the Hawel language, it covers from a simple "Hello World!", to things such as variables, types, getting input and arithmetic.
@@ -111,6 +117,7 @@ After that, we just assign some variables the value of each operation, to then e
 Here we are going to learn the control flow commands, such as `if` statements and `case` statements. Not only that, but boolean operatos, like `==` (equals), `~` (not), `~=` (not equals), `&&` (and), `||` (or) ,  `>` (greater than), `<` (less than), `>=` (greater or equal) and `<=` (less or equal).
 
 - [If statement](#if-statement)
+- [case-statement](#case-statement)
 
 ## If statement
 This is how we state an if expression:
@@ -157,11 +164,29 @@ else
     | echo ["Unknown user!"]
 end
 ```
-[Here you can find all the definitions for the `if` token](#if)
+Here you can find all the definitions for the [if](#if) token, [elif](#elif) token, and [else](#else) token.
 
-[Here you can find all the definitions for the `elif` clause token](#elif)
+## Case statement
+The case statement of Hawel isn't like a conventional case expression, it's semantically equal to a generic ternary expression.
 
-[Here you can find all the definitions for the `else` clause token](#else)
+This is how we state a case expression in Hawel:
+```
+| case <condition> select <value> otherwise <value>
+```
+The <condition> part from the code above represents any expression that could evaluate to a boolean (`1` or `0`, also their variable equivalents: `true` or `false`). Both `<value>` parts can be any kind of value, that is evaluated and returned by the case statement.
+
+Here's a simple use of the case statement:
+```
+| whatsUp: case 1 ~= 0 select "Math works!" otherwise "Something seems wrong..."
+| echo [whatsUp]
+```
+**Explanation:**
+
+The variable `whatsUp` is going to be assigned `"Math works!"` case the condition `1 ~= 0` is indeed true, otherwise it is assigned `"Something seems wrong..."`. Then it's value is echoed in the second line.
+
+Here you can find the definitions for the [case](#case) token, and the [select, otherwise](#select) token.
+
+---
 
 ## Tokens
 Collection of all tokens defined in Hawel.
@@ -195,6 +220,15 @@ Collection of all tokens defined in Hawel.
 #### Else
 - `..?`
 - `else`
+
+#### Case
+- `::`
+- `case`
+
+#### Select
+- `--`
+- `select`
+- `otherwise`
 
 ---
 
