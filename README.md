@@ -12,7 +12,11 @@ Contents of this document:
         - [Arithmetic](#arithmetic)
     - [Control flow, booleans and boolean operators](#control-flow-booleans-and-boolean-operators)
         - [If statement](#if-statement)
-        - [case-statement](#case-statement)
+        - [Case statement](#case-statement)
+    - [Loops](#loops)
+        - [For loop](#for-loop)
+        - [While loop](#while-loop)
+        - [For-each loop](#for-each-loop)
     - [Tokens](#tokens)
         - [Next](#next)
         - [Assignment](#assignment)
@@ -22,9 +26,19 @@ Contents of this document:
         - [Else](#else)
         - [Case](#case)
         - [Select](#select)
+        - [For](#for)
+        - [To](#to)
+        - [Of](#of)
+        - [By](#by)
+        - [While](#while)
 
 # Introduction
 This part is the introduction to the Hawel language, it covers from a simple "Hello World!", to things such as variables, types, getting input and arithmetic.
+
+---
+
+Contents:
+
 - [Hello World!](#hello-world)
 - [Declaring variables](#declaring-variables)
 - [Comments](#comments)
@@ -116,8 +130,12 @@ After that, we just assign some variables the value of each operation, to then e
 # Control flow, booleans and boolean operators
 Here we are going to learn the control flow commands, such as `if` statements and `case` statements. Not only that, but boolean operatos, like `==` (equals), `~` (not), `~=` (not equals), `&&` (and), `||` (or) ,  `>` (greater than), `<` (less than), `>=` (greater or equal) and `<=` (less or equal).
 
+---
+
+Contents:
+
 - [If statement](#if-statement)
-- [case-statement](#case-statement)
+- [Case statement](#case-statement)
 
 ## If statement
 This is how we state an if expression:
@@ -173,7 +191,7 @@ This is how we state a case expression in Hawel:
 ```
 | case <condition> select <value> otherwise <value>
 ```
-The <condition> part from the code above represents any expression that could evaluate to a boolean (`1` or `0`, also their variable equivalents: `true` or `false`). Both `<value>` parts can be any kind of value, that is evaluated and returned by the case statement.
+The `<condition>` part from the code above represents any expression that could evaluate to a boolean (`1` or `0`, also their variable equivalents: `true` or `false`). Both `<value>` parts can be any kind of value, that is evaluated and returned by the case statement.
 
 Here's a simple use of the case statement:
 ```
@@ -186,10 +204,99 @@ The variable `whatsUp` is going to be assigned `"Math works!"` case the conditio
 
 Here you can find the definitions for the [case](#case) token, and the [select, otherwise](#select) token.
 
+# Loops
+In this section we will learn how to perform loops of many kinds, such as a simple `for`, a `while`, or even a `for-each`.
+
+- [For loop](#for-loop)
+- [While loop](#while-loop)
+- [For-each loop](#for-each-loop)
+
+## For loop
+For loops in Hawel aren't C-Like loops, they're more like pascal's and lua's, with an initial value, an end value, and a step to increment by.
+
+This is how we would state a for loop without a step in Hawel:
+```
+| for <variable>: <initialValue> to <endValue> do
+    | code...
+done
+```
+And this is how you state with a step value in Hawel:
+```
+| for <variable>: <initialValue> to <endValue> by <stepValue> do
+    | code...
+done
+```
+The `<variable>` part should just be any identifier to be set as our 'iterator', and then be assigned with our `<initialValue>`, so, basically, the first part of the loop is just a [variable declaration](#declaring-variables). After the declaration of our 'iterator', we must state a `<endValue>` for it to reach, and optionally, the `<stepValue>`, which will increment our 'iterator' by it's value each looping. (`<stepValue>` is always 1 if no step is provided, as the first loop example)
+
+Here's some examples on how to loop from 0 to 10 and print each one of those numbers:
+###### stepless:
+```
+| for n: 0 to 11 do </> Needs to be 11, because it always stops at n - 1
+    | echo [n]
+done
+```
+###### steping by 2:
+```
+| for n = 0 to 11 by 2 do
+    | echo [n]
+done
+```
+Here you can find the definitions for the [for](#for) token, [to](#to) token, and [by](#by) token.
+
+## While loop
+This is how we state a while loop:
+```
+| while <condition> do
+    | code...
+done
+```
+
+The `<condition>` part from the code above represents any expression that could evaluate to a boolean (`1` or `0`, also their variable equivalents: `true` or `false`).
+
+Here's a simple program that loops through 0 to 10 and prints each one of them:
+```
+| n = 0
+| while n <= 10 do
+    | echo [n]
+    | n = n + 1
+end
+```
+Here you can find the definitions for the [while](#while) token.
+
+## For-each loop
+This is how we state a For-each loop:
+```
+| for <variable> of <iterable> do
+    | code...
+done
+```
+The `<variable>` part should be any identifier, to be set as our 'iterator'. The `<iterable>` part should be any iterable value, such as a list or a string.
+
+Here's an example on how to loop through each letter of a word and print them:
+```
+| for letter of "I love programming" do
+    | echo [letter]
+done
+```
+Could be a list too:
+```
+| for number of {1, 2, 3, 4, 5, 6, 7, 8, 9, 10} do
+    | echo [number]
+done
+```
+Here you can find the definitions for the [for](#for) token and [of](#of) token.
+
 ---
 
 ## Tokens
 Collection of all tokens defined in Hawel.
+
+##### Block
+- `$`
+- `do`
+- `end`
+- `then`
+- `done`
 
 ##### Comment
 - `::=`
@@ -229,6 +336,26 @@ Collection of all tokens defined in Hawel.
 - `--`
 - `select`
 - `otherwise`
+
+#### While
+- `%`
+- `while`
+
+#### For
+- `!`
+- `for`
+
+#### To
+- `=>`
+- `to`
+
+#### By
+- `..`
+- `by`
+
+#### Of
+- `;;`
+- `of`
 
 ---
 
