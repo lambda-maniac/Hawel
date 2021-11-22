@@ -1,7 +1,12 @@
 # Hawel Esoteric language
-This is a basic language I made for **study purposes**. It has almost everything a normal programming language does. In Hawel, we have two types of syntaxes, one which is purely symbolic, and one more verbose. You can use any of them, or even both at the same time. (This document will show you both of them)
+This is a basic language I made for **study purposes**. It has almost everything a normal programming language does. In Hawel, we have two types of syntaxes, one which is purely symbolic, and one more verbose. You can use any of them, or even both at the same time. (This document will show you both of them).
 
-[TOC]
+Contents of this document:
+- [Hawel Esoteric Language](#hawel-esoteric-language)
+    - [Introduction](#introduction)
+        - [Hello World!](#hello-world)
+    - [Tokens](#tokens)
+        - [Next](#next)
 
 ## Introduction
 This part is the introduction to the Hawel language, it covers from a simple "Hello World!", to things such as variables, types and arithmetic.
