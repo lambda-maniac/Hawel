@@ -6,14 +6,19 @@ Contents of this document:
     - [Introduction](#introduction)
         - [Hello World!](#hello-world)
         - [Declaring variables](#declaring-variables)
+        - [Comments](#comments)
     - [Tokens](#tokens)
         - [Next](#next)
         - [Assignment](#assignment)
+        - [Comment](#comment)
 
-## Introduction
+# Introduction
 This part is the introduction to the Hawel language, it covers from a simple "Hello World!", to things such as variables, types and arithmetic.
+- [Hello World!](#hello-world)
+- [Declaring variables](#declaring-variables)
+- [Comments](#comments)
 
-#### Hello World!
+## Hello World!
 Here's a simple "Hello World!" example in Hawel:
 ```
 | echo ["Hello World!"]
@@ -28,7 +33,7 @@ Breaking apart the code above, we have 5 tokens in total:
 **Explanation:**
 First of all, before starting to write an expression in Hawel, you need a `<NEXT>` token, which it's variations can be found here: [next](#next). After that, we see an identifier called `echo`,  which is our 'standard output' function, then we use `[]` to call that function, and pass `"Hello World!"` inside the brackets as it's argument.
 
-#### Declaring variables
+## Declaring variables
 This is how we can declare variables in Hawel:
 ```
 | name: "John Doe"
@@ -44,6 +49,16 @@ Breaking apart the first line of the code above, we have 4 tokens in total:
 
 **Explanation:**
 As we can see, we have our `<NEXT>` token to indicate a new expression, after that, we have an identifier called `name`, which will be the name of our variable. That name is then proceeded by an `<ASSIGNMENT>` token (in this case, a colon ':', you can find all the definitions here: [assignment](#assignment)), and finally, by the value we want it to be assigned (string `"John Doe"`).
+
+## Comments
+This is how we can comment certain parts of our code in Hawel:
+```
+</> Inline comment.
+::= Inline comment.
+</ Multiline comment />
+[[ Multiline comment ]]
+```
+The code above is completely ignored by the interpreter. You can see the definition for the comment token here: [comment](#comment)
 
 ## Tokens
 Collection of all tokens defined in Hawel.
@@ -163,6 +178,12 @@ Collection of all tokens defined in Hawel.
     r"^\)": "RIGHT_PARENTHESIS",
 }
 ```
+##### Comment
+- `::=`
+- `</>`
+- `[[ ]]`
+- `</ />`
+
 ##### Next
 - `;`
 - `|`
