@@ -10,20 +10,20 @@ Here's a simple "Hello World!" example in Hawel:
 ```
 | echo ["Hello World!"]
 ```
-Breaking the code above apart, we have 5 tokens in total: 
+Breaking apart the code above, we have 5 tokens in total: 
 - `|             : <NEXT>`
 - `echo          : <IDENTIFIER>`
 - `[             : <OPENING_BRACKET>`
 - `"Hello World! : <STRING>` 
 - `]             : <CLOSING_BRACKET>`
 
-##### Explanation:
+**Explanation:**
 First of all, before starting to write an expression in Hawel, you need a `<NEXT>` token, which it's variations can be found here: [next](#next). After that, we see an identifier called `echo`,  which is our 'standard output' function, then we use `[]` to call that function, and pass `"Hello World!"` inside the brackets as it's argument.
 
 ## Tokens
 Collection of all tokens defined in Hawel.
-#### Raw tokens
-Defined at `hawelTokens.py`
+
+###### Defined at `hawelTokens.py`
 ```python
 {
     r"^[\s+\n+]": None,
@@ -138,10 +138,8 @@ Defined at `hawelTokens.py`
     r"^\)": "RIGHT_PARENTHESIS",
 }
 ```
-#### Next
+##### Next
 - `;`
 - `|`
 - `endl`
 - `thenl`
-
-# WIP TESTING
