@@ -17,6 +17,9 @@ Contents of this document:
         - [For loop](#for-loop)
         - [While loop](#while-loop)
         - [For-each loop](#for-each-loop)
+        - [Loops control flow](#loops-control-flow)
+            - [Break](#break-command)
+            - [Continue](#continue-command)
     - [Tokens](#tokens)
         - [Next](#next)
         - [Assignment](#assignment)
@@ -31,6 +34,8 @@ Contents of this document:
         - [Of](#of)
         - [By](#by)
         - [While](#while)
+        - [Break](#break)
+        - [Continue](#continue)
 
 # Introduction
 This part is the introduction to the Hawel language, it covers from a simple "Hello World!", to things such as variables, types, getting input and arithmetic.
@@ -204,12 +209,17 @@ The variable `whatsUp` is going to be assigned `"Math works!"` case the conditio
 
 Here you can find the definitions for the [case](#case) token, and the [select, otherwise](#select) token.
 
+###### **This marks the end of [Control flow, booleans and boolean operators](#control-flow-booleans-and-boolean-operators) part.**
+
 # Loops
 In this section we will learn how to perform loops of many kinds, such as a simple `for`, a `while`, or even a `for-each`.
 
 - [For loop](#for-loop)
 - [While loop](#while-loop)
 - [For-each loop](#for-each-loop)
+- [Loops control flow](#loops-control-flow)
+    - [Break](#break-command)
+    - [Continue](#continue-command)
 
 ## For loop
 For loops in Hawel aren't C-Like loops, they're more like pascal's and lua's, with an initial value, an end value, and a step to increment by.
@@ -286,6 +296,63 @@ done
 ```
 Here you can find the definitions for the [for](#for) token and [of](#of) token.
 
+## Loop control flow
+This section will teach you how to use the flow control commands `continue` and `break` inside loops.
+
+##### Break command
+The break command is used inside loops to stop their looping proccess and jump straight to the end of it's definition.
+
+Here's an example on how to stop the execution of the loop when it reachs the value 5:
+```
+| for n: 0 to 11 do
+    | if n == 5 do 
+        | break
+    end
+    | echo [n]
+done
+```
+The code above will only output:
+>0
+>1
+>2
+>3
+>4
+>5
+
+Reason is; when `n = 5`, the `if` is executed and the break is effectuated, ending the loop routine.
+
+Here you can find the definitions for the [break](#break) token.
+
+##### Continue command
+The continue command is used inside loops to stop their current iteration, and jump back to the definition of the loop, to check for it's conditions.
+
+Here's an example on how to skip only the fifth iterarion of a loop:
+```
+| for n: 0 to 11 do
+    | if n == 5 do 
+        | continue
+    end
+    | echo [n]
+done
+```
+The code above will only output:
+>0
+>1
+>2
+>3
+>4
+>6
+>7
+>8
+>9
+>10
+
+Reason is; when `n = 5`, the `if` is executed and the continue is effectuated, ending the loop current iteration and jumping back to the definition.
+
+Here you can find the definitions for the [continue](#continue) token.
+
+###### **This marks the end of the [Loops](#loops) part.**
+
 ---
 
 ## Tokens
@@ -356,6 +423,14 @@ Collection of all tokens defined in Hawel.
 #### Of
 - `;;`
 - `of`
+
+#### Break
+- `<<<`
+- `break`
+
+#### Continue
+- `>>>`
+- `continue`
 
 ---
 
